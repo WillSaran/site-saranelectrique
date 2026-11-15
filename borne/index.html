@@ -330,7 +330,7 @@ footer b{color:#fff}
     $('#s3s').textContent=com?'Nous vous avons écrit à':'Nous venons de l’envoyer à';
     $('#s3c').textContent=com?'Pour planifier la visite':'Pour une soumission détaillée ou une visite';
   }
-  function showDist(){$('#dist').textContent=st.dist?('≈ '+st.dist+' pi'+(st.manual?'':' ('+Math.round(st.dist/3.281)+' m)'+(st.route==='coin'?', avec un coin':', en ligne droite'))):(markers.borne?'Placez le panneau':'Placez la borne');
+  function showDist(){$('#dist').textContent=st.dist?('≈ '+st.dist+' pi'+(st.manual?'':' ('+Math.round(st.dist/3.281)+' m)'+(st.route==='coin'?', avec un coin':', en ligne droite'))):(st.manual?'Choisissez la distance':(markers.borne?'Placez le panneau':'Placez la borne'));
     var rq=$('#routeQ');if(rq){rq.hidden=!(markers.borne&&markers.panneau);$$('[data-route]',rq).forEach(function(b){b.className='pill'+(st.route===b.getAttribute('data-route')?' on':'');});}}
 
   // Carte (Leaflet + imagerie satellite Esri)
@@ -402,7 +402,7 @@ footer b{color:#fff}
   var adr=$('#f-adr'),list=$('#adr-list'),tmr=null,lastQ='';
   function fmt(p){return [[p.housenumber,p.street||p.name].filter(Boolean).join(' '),p.city||p.town||p.village,(p.state==='Québec'||p.state==='Quebec')?'QC':p.state,p.postcode].filter(Boolean).join(', ');}
   function choose(t,x,z){adr.value=t;adr.blur();st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||'',z:z||20};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=z?'✓ Secteur trouvé : zoomez sur votre maison, puis placez la borne':'✓ Adresse trouvée';$('#adr-ok').hidden=false;initMap();}
-  function goManual(){adr.blur();st.addr=null;st.free=false;st.houseSet=false;if(map){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}if(home){map.removeLayer(home);home=null;}}st.dist=st.b.distm?Number(st.b.distm):null;st.skip=true;st.manual=true;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent='✓ Adresse notée : indiquez maintenant la distance approximative entre le panneau et la borne.';$('#adr-ok').hidden=false;render();renderTools();setTimeout(function(){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});},120);}
+  function goManual(){adr.blur();st.addr=null;st.free=false;st.houseSet=false;if(map){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}if(home){map.removeLayer(home);home=null;}}st.dist=st.b.distm?Number(st.b.distm):null;st.skip=true;st.manual=true;showDist();list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent='✓ Adresse notée : indiquez maintenant la distance approximative entre le panneau et la borne.';$('#adr-ok').hidden=false;render();renderTools();setTimeout(function(){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});},120);}
   function goFree(){adr.blur();st.free=true;st.skip=false;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=adr.value.trim()?'✓ Adresse notée : trouvez maintenant votre maison sur la carte':'Trouvez votre maison sur la carte';$('#adr-ok').hidden=false;render();initMap();setTimeout(function(){$('#map').scrollIntoView({behavior:'smooth',block:'center'});},80);}
   $('#skipMap2').onclick=goManual;
   var CP=/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
