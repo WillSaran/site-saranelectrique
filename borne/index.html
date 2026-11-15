@@ -175,7 +175,7 @@ footer b{color:#fff}
     <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;max-width:820px">
     <div class="fld" style="position:relative;flex:1 1 420px;min-width:0">
       <label for="f-adr">Adresse des travaux</label>
-      <input id="f-adr" autocomplete="off" placeholder="ex. 1424 1re Rue, Saint-Paul-de-l'Île-aux-Noix" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="adr-list">
+      <input id="f-adr" autocomplete="off" enterkeyhint="done" placeholder="ex. 1424 1re Rue, Saint-Paul-de-l'Île-aux-Noix" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="adr-list">
       <ul id="adr-list" role="listbox" hidden></ul>
       <span id="adr-ok" class="adr-ok" hidden>✓ Adresse trouvée</span>
     </div>
@@ -396,8 +396,9 @@ footer b{color:#fff}
     (j.features||[]).forEach(function(x){delete x.properties.postcode;});return j;});}
   var adr=$('#f-adr'),list=$('#adr-list'),tmr=null,lastQ='';
   function fmt(p){return [[p.housenumber,p.street||p.name].filter(Boolean).join(' '),p.city||p.town||p.village,(p.state==='Québec'||p.state==='Quebec')?'QC':p.state,p.postcode].filter(Boolean).join(', ');}
-  function choose(t,x,z){adr.value=t;st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||'',z:z||20};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=z?'✓ Secteur trouvé : zoomez sur votre maison, puis placez la borne':'✓ Adresse trouvée';$('#adr-ok').hidden=false;initMap();}
-  function goFree(){st.free=true;st.skip=false;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=adr.value.trim()?'✓ Adresse notée : trouvez maintenant votre maison sur la carte':'Trouvez votre maison sur la carte';$('#adr-ok').hidden=false;render();initMap();setTimeout(function(){$('#map').scrollIntoView({behavior:'smooth',block:'center'});},80);}
+  function choose(t,x,z){adr.value=t;adr.blur();st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||'',z:z||20};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=z?'✓ Secteur trouvé : zoomez sur votre maison, puis placez la borne':'✓ Adresse trouvée';$('#adr-ok').hidden=false;initMap();}
+  function goManual(){adr.blur();st.skip=true;st.manual=true;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent='✓ Adresse notée : indiquez maintenant la distance approximative entre le panneau et la borne.';$('#adr-ok').hidden=false;render();renderTools();setTimeout(function(){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});},120);}
+  function goFree(){adr.blur();st.free=true;st.skip=false;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=adr.value.trim()?'✓ Adresse notée : trouvez maintenant votre maison sur la carte':'Trouvez votre maison sur la carte';$('#adr-ok').hidden=false;render();initMap();setTimeout(function(){$('#map').scrollIntoView({behavior:'smooth',block:'center'});},80);}
   $('#freeMap').onclick=goFree;
   $('#skipMap2').onclick=function(){if(!st.skip)$('#skipMap').click();};
   var CP=/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
@@ -410,16 +411,19 @@ footer b{color:#fff}
         var f=(j.features||[]).filter(function(x){return x.properties.countrycode==='CA';}).slice(0,5),cp=CP.test(q);
         list.innerHTML='';
         f.forEach(function(x){var li=document.createElement('li');li.setAttribute('role','option');li.tabIndex=-1;var t=fmt(x.properties);li.textContent=t;
-          li.onmousedown=function(e){e.preventDefault();choose(t,x);};li.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();choose(t,x);adr.focus();}};list.appendChild(li);});
+          li._pick=function(){choose(t,x);};li.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();choose(t,x);}};list.appendChild(li);});
         if(cp){var pc=q.toUpperCase().replace(/^(...) ?(...)$/,'$1 $2');var hit=f.filter(function(x){return (x.properties.postcode||'').toUpperCase().replace(/\s/g,'')===pc.replace(/\s/g,'');})[0]||f[0];
-          list.innerHTML='';if(hit){var li0=document.createElement('li');li0.setAttribute('role','option');li0.tabIndex=-1;li0.textContent='Code postal '+pc+' (secteur)';li0.onmousedown=function(e){e.preventDefault();choose('Code postal '+pc,hit,17);};list.appendChild(li0);}}
-        var la=document.createElement('li');la.className='alt';la.setAttribute('role','option');la.tabIndex=-1;la.textContent='Pas dans la liste? Garder ce que j’ai écrit et trouver ma maison sur la carte →';la.onmousedown=function(e){e.preventDefault();goFree();};la.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();goFree();}};list.appendChild(la);
+          list.innerHTML='';if(hit){var li0=document.createElement('li');li0.setAttribute('role','option');li0.tabIndex=-1;li0.textContent='Code postal '+pc+' (secteur)';li0._pick=function(){choose('Code postal '+pc,hit,17);};list.appendChild(li0);}}
+        var la=document.createElement('li');la.className='alt';la.setAttribute('role','option');la.tabIndex=-1;la.textContent='Adresse pas dans la liste? Garder ce que j’ai écrit et donner une distance approximative →';la._pick=goManual;la.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();goManual();}};list.appendChild(la);
         list.hidden=false;adr.setAttribute('aria-expanded','true');
       }).catch(function(){list.hidden=true;});
     },300);
   });
-  adr.addEventListener('blur',function(){setTimeout(function(){list.hidden=true;},150);});
-  adr.addEventListener('keydown',function(e){var items=$$('li',list);if(e.key==='Enter'&&!st.addr&&items.length&&!list.hidden){e.preventDefault();items[0].onmousedown({preventDefault:function(){}});return;}if(list.hidden||!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();items[0].focus();}});
+  adr.addEventListener('blur',function(){setTimeout(function(){list.hidden=true;},400);});
+  // Choix dans la liste : réagit dès que le doigt touche (cellulaire), puis ferme le clavier
+  var lastPick=0;function pickEv(e){var li=e.target.closest&&e.target.closest('li');if(!li||!li._pick)return;e.preventDefault();if(Date.now()-lastPick<700)return;lastPick=Date.now();li._pick();}
+  list.addEventListener('pointerdown',pickEv);list.addEventListener('mousedown',pickEv);list.addEventListener('click',pickEv);
+  adr.addEventListener('keydown',function(e){var items=$$('li',list);if(e.key==='Enter'&&!st.addr&&items.length&&!list.hidden){e.preventDefault();items[0]._pick();return;}if(e.key==='Enter'&&!st.addr&&adr.value.trim()){e.preventDefault();goManual();return;}if(list.hidden||!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();items[0].focus();}});
   list.addEventListener('keydown',function(e){var items=$$('li',list),i=items.indexOf(document.activeElement);
     if(e.key==='ArrowDown'){e.preventDefault();(items[i+1]||items[0]).focus();}
     else if(e.key==='ArrowUp'){e.preventDefault();(items[i-1]||adr).focus();}
