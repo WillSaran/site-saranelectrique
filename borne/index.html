@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Installation de borne de recharge à Saint-Jean-sur-Richelieu – Saran Électrique</title>
+<meta name="description" content="Recevez par courriel une estimation pour l'installation de votre borne de recharge à la maison. Entrepreneur électricien à Saint-Jean-sur-Richelieu et en Montérégie. Aide Écorecharge jusqu'à 600 $.">
+<link rel="canonical" href="https://saranelectrique.com/borne/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Combien coûte l'installation de votre borne ? – Saran Électrique">
+<meta property="og:description" content="Placez votre borne sur la vue satellite de votre maison et recevez votre estimation par courriel.">
+<meta property="og:image" content="https://saranelectrique.com/borne/borne-saran.jpg">
+<meta property="og:url" content="https://saranelectrique.com/borne/">
+<link rel="icon" href="logo.jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+/* Mêmes couleurs et polices que le site saranelectrique.com */
+:root{--ink:#141414;--mute:#4D4D4D;--line:#E3E3E3;--bg:#F4F4F4;--card:#fff;--orange:#FA890D;--soft:#FDEBD7}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.5}
+h1,h2,h3{font-family:Rajdhani,Inter,sans-serif;margin:0;line-height:1.1}
+img{max-width:100%}
+.pad{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1120px;margin:0 auto}
+header{background:var(--ink);color:#fff}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;font-family:Rajdhani,sans-serif;font-weight:700;font-size:20px}
+.brand img{width:48px;height:48px;border-radius:999px;display:block}
+.steps{display:flex;gap:8px;flex-wrap:wrap}
+.step{padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600;color:#A6A6A6;border:1px solid #333}
+.step.on{background:var(--orange);color:var(--ink);border-color:var(--orange)}.step.done{background:#333;color:#fff}
+.hero{background:var(--ink);color:#fff}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px;align-items:center;padding-block:28px 40px}
+@media(max-width:820px){.hero .wrap{grid-template-columns:1fr}.hero img{max-width:420px}}
+.hero h1{font-size:clamp(34px,5vw,52px);text-wrap:balance}
+.hero h1 span{color:var(--orange)}
+.hero p{color:#D0D0D0;font-size:17px;max-width:52ch;margin:14px 0 0}
+.hero img{border-radius:14px;display:block;width:100%;height:auto}
+.hero ol{margin:18px 0 0;padding-left:20px;color:#D0D0D0}
+.hero ol li+li{margin-top:4px}
+main .wrap{padding-block:36px 64px}
+.t{font-size:clamp(28px,4vw,38px);margin:0 0 6px}
+.sub{margin:0 0 22px;color:var(--mute);font-size:17px}
+.fld{display:flex;flex-direction:column;gap:6px}.fld label{font-weight:600;font-size:14px}
+.fld input,.fld select{padding:14px;border:1.5px solid #ccc;border-radius:10px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink);width:100%}
+.fld input:focus,.fld select:focus{outline:2px solid var(--orange);outline-offset:0;border-color:transparent}
+#adr-list{position:absolute;left:0;right:0;top:100%;z-index:1000;list-style:none;margin:4px 0 0;padding:6px;background:#fff;border:1.5px solid var(--ink);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+#adr-list li{padding:10px 12px;border-radius:8px;cursor:pointer}
+#adr-list li:hover,#adr-list li:focus{background:var(--soft);outline:0}
+.adr-ok{color:#1d7a46;font-size:13px;font-weight:600}
+.cols{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.cols>.left{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.cols>.right{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.tool{display:flex;align-items:center;gap:10px;padding:10px 14px;min-height:48px;border-radius:12px;cursor:pointer;font-weight:600;font-size:15px;font-family:inherit;color:var(--ink);background:#fff;border:2px solid var(--line)}
+.tool.on{background:var(--soft);border-color:var(--ink)}
+.pin{width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;border:2px solid #fff}
+.pin-b{background:#995000}.pin-p{background:var(--ink)}
+#map{height:440px;border-radius:14px;overflow:hidden;background:#222;border:3px solid var(--ink)}
+@media(max-width:560px){#map{height:360px}}
+#map-msg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff;background:rgba(20,20,20,.85);border-radius:14px}
+.distbox{background:var(--ink);color:#fff;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px}
+.distbox h3{font-size:20px}
+#dist{font-size:30px;font-weight:700;color:var(--orange)}
+.distbox small{color:#A6A6A6;line-height:1.5;font-size:13px}
+.q{font-weight:600;font-size:15px;margin:0 0 10px}
+.pills{display:flex;flex-wrap:wrap;gap:10px}
+.pill{background:#fff;color:var(--ink);border:1.5px solid #ccc;padding:11px 16px;border-radius:999px;font-weight:600;font-size:15px;cursor:pointer;font-family:inherit}
+.pill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pill:focus-visible,.tool:focus-visible,.btn:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.btn{border:0;padding:16px 26px;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;font-family:inherit}
+.btn-orange{background:var(--orange);color:var(--ink)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-outline{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.btn[disabled]{opacity:.6;cursor:wait}
+.bar{display:flex;justify-content:space-between;gap:12px;margin-top:26px;flex-wrap:wrap}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--mute)}
+.check input{width:20px;height:20px;margin-top:1px;accent-color:var(--ink);flex:none}
+.err{color:#b3261e;font-size:14px;font-weight:600}
+.note{color:var(--mute);font-size:14px}
+.subsidy{margin-top:18px;background:var(--soft);border-radius:14px;padding:18px;font-size:14px}
+.subsidy b{color:var(--ink)}
+.subsidy ul{margin:8px 0 0;padding-left:18px;color:var(--mute)}
+.done{text-align:center;max-width:620px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:12px}
+.done .ico{width:64px;height:64px;border-radius:999px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:30px}
+footer{background:var(--ink);color:#A6A6A6;font-size:13px}
+footer .wrap{padding-block:20px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+footer b{color:#fff}
+.hp{position:absolute;left:-9999px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="pad"><div class="wrap">
+  <span class="brand"><img src="logo.jpeg" alt="">Saran Électrique</span>
+  <div class="steps" id="steps"></div>
+</div></header>
+
+<section class="hero pad" id="hero"><div class="wrap">
+  <div>
+    <h1>Combien coûte l'installation de <span>votre borne</span>&nbsp;?</h1>
+    <p>Montrez-nous sur la vue satellite de votre maison où vous voulez la borne et où se trouve votre panneau électrique. On calcule la longueur de câble et on vous envoie votre estimation par courriel.</p>
+    <ol>
+      <li>Entrez votre adresse et placez la borne et le panneau.</li>
+      <li>Répondez à quelques questions.</li>
+      <li>Recevez votre estimation par courriel, en quelques secondes.</li>
+    </ol>
+  </div>
+  <img src="borne-saran.jpg" alt="Borne de recharge installée sur le mur d'un garage, voiture électrique branchée au crépuscule">
+</div></section>
+
+<main class="pad"><div class="wrap">
+
+  <!-- Étape 1 : la maison -->
+  <section id="s1">
+    <h2 class="t">Votre maison</h2>
+    <p class="sub">Commencez par l'adresse où sera installée la borne.</p>
+    <div class="fld" style="position:relative;max-width:640px">
+      <label for="f-adr">Adresse des travaux *</label>
+      <input id="f-adr" autocomplete="off" placeholder="Commencez à taper l'adresse…" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="adr-list">
+      <ul id="adr-list" role="listbox" hidden></ul>
+      <span id="adr-ok" class="adr-ok" hidden>✓ Adresse trouvée</span>
+    </div>
+
+    <div class="cols" style="margin-top:22px">
+      <div class="left">
+        <div class="pills" id="mapTools">
+          <button type="button" class="tool on" data-mt="borne"><span class="pin pin-b">VE</span>Placer la borne</button>
+          <button type="button" class="tool" data-mt="panneau"><span class="pin pin-p">P</span>Placer le panneau</button>
+        </div>
+        <div style="position:relative">
+          <div id="map"></div>
+          <div id="map-msg"></div>
+        </div>
+        <span class="note">Touchez la carte pour placer la borne, puis le panneau. Vous pouvez glisser les points pour les ajuster.</span>
+        <div id="manual" hidden>
+          <p class="q">Distance approximative entre le panneau et la borne</p>
+          <div class="pills" data-q="distm"></div>
+        </div>
+        <button type="button" class="btn-link note" id="noMap" style="background:none;border:0;padding:0;text-align:left;cursor:pointer;text-decoration:underline">La carte ne fonctionne pas? Indiquer la distance moi-même</button>
+      </div>
+      <div class="right">
+        <div class="distbox">
+          <h3>Distance estimée</h3>
+          <span id="dist">—</span>
+          <small>Trajet du câble à angle droit (90°), comme le long des murs, entre le panneau et la borne. On confirme la mesure avec vous.</small>
+        </div>
+        <div><p class="q">Où sera la borne ?</p><div class="pills" data-q="lieu"></div></div>
+        <div><p class="q">Ampérage de votre panneau</p><div class="pills" data-q="amp"></div></div>
+        <div><p class="q">Le câble passera…</p><div class="pills" data-q="passage"></div></div>
+        <div><p class="q">Avez-vous déjà votre borne ?</p><div class="pills" data-q="achat"></div>
+          <div id="modele-wrap" hidden style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
+            <div class="fld"><label for="f-marque">Marque</label><select id="f-marque"><option value="">Choisir…</option><option>FLO</option><option>Grizzl-E</option><option>Tesla Wall Connector</option><option>ChargePoint</option><option>Autel</option><option>Wallbox</option><option>Autre</option></select></div>
+            <div class="fld"><label for="f-modele">Modèle</label><input id="f-modele" placeholder="ex. FLO Home X5, Grizzl-E Classic…"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="err" id="err1" hidden></p>
+    <div class="bar"><span></span><button class="btn btn-dark" id="toS2" type="button">Continuer → Recevoir mon estimation</button></div>
+  </section>
+
+  <!-- Étape 2 : courriel -->
+  <section id="s2" hidden>
+    <h2 class="t">Où envoyer votre estimation ?</h2>
+    <p class="sub">On vous l'envoie par courriel en quelques secondes.</p>
+    <form id="form" class="card" novalidate style="max-width:720px">
+      <div class="grid2">
+        <div class="fld"><label for="f-prenom">Prénom *</label><input id="f-prenom" autocomplete="given-name"></div>
+        <div class="fld"><label for="f-mail">Courriel *</label><input id="f-mail" type="email" autocomplete="email"></div>
+      </div>
+      <div class="hp" aria-hidden="true"><label for="f-site">Site web</label><input id="f-site" tabindex="-1" autocomplete="off"></div>
+      <label class="check" style="margin-top:16px"><input type="checkbox" id="f-consent"><span>J'accepte que Saran Électrique me contacte par courriel au sujet de ma demande. *</span></label>
+      <p class="err" id="err2" hidden></p>
+      <div class="bar"><button class="btn btn-outline" id="back1" type="button">← Retour</button><button class="btn btn-orange" id="send" type="submit">Recevoir mon estimation par courriel</button></div>
+    </form>
+    <div class="subsidy" style="max-width:720px">
+      <b>Aide financière Écorecharge : jusqu'à 600 $</b> du gouvernement du Québec pour l'achat d'une borne de recharge à domicile admissible.
+      <ul>
+        <li>L'aide porte uniquement sur le prix de la borne, avant taxes. Les frais d'installation ne sont pas admissibles.</li>
+        <li>La demande est faite par le propriétaire, une fois la borne installée.</li>
+        <li>Pièces requises : la facture d'achat de la borne et la facture des travaux d'installation d'un entrepreneur électricien, avec son numéro de licence RBQ. Nous vous remettons cette facture.</li>
+        <li>Le montant de l'aide n'est pas déduit de nos prix.</li>
+      </ul>
+      <p style="margin:8px 0 0"><a href="https://www.quebec.ca/transport-electrique/aide-financiere-recharge/borne-domicile/depenses-acquisition-borne" target="_blank" rel="noopener">Conditions complètes sur Québec.ca</a></p>
+    </div>
+  </section>
+
+  <!-- Étape 3 : envoyé -->
+  <section id="s3" hidden>
+    <div class="done">
+      <div class="ico" aria-hidden="true">✉️</div>
+      <h2 class="t">Votre estimation est en route</h2>
+      <p class="sub" style="margin:0">Nous venons de l'envoyer à <b id="done-mail"></b>. Vérifiez aussi vos courriels indésirables.</p>
+      <div class="card" style="text-align:left;width:100%">
+        <b>Pour une soumission détaillée ou une visite</b>
+        <p class="note" style="margin:6px 0 0">Répondez simplement à notre courriel avec des photos de votre panneau électrique (porte ouverte) et de l'emplacement souhaité, votre nom complet et votre numéro de téléphone.</p>
+      </div>
+    </div>
+  </section>
+
+</div></main>
+
+<footer class="pad"><div class="wrap">
+  <span><b>Saran Électrique inc.</b> · Saint-Jean-sur-Richelieu · RBQ 5819-9274-01</span>
+  <span>Estimation indicative, avant taxes. Le prix final est confirmé par soumission écrite.</span>
+</div></footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  // Adresse du script Google qui calcule et envoie l'estimation (Apps Script, « Application Web »).
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxextadczKCEGtkPY8XNiTdVMGSu5R_-S92EzC5HIc2AZdThcI8Pv_E33TxijRzb1Ae/exec';
+
+  var $=function(s,r){return (r||document).querySelector(s);}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+  var Q={lieu:[['garage','Dans le garage'],['ext','Extérieur'],['nsp','Je ne sais pas']],
+    amp:[['200','200 A'],['100','100 A'],['autre','Autre'],['nsp','Je ne sais pas']],
+    passage:[['ssnf','Sous-sol non fini'],['ext','Par l’extérieur'],['fini','Murs finis'],['sol','Sous terre ou béton'],['nsp','Je ne sais pas']],
+    achat:[['oui','Oui, je l’ai'],['non','Non, fournissez-la-moi']],
+    distm:[['10','Moins de 15 pi'],['25','15 à 30 pi'],['40','30 à 50 pi'],['60','Plus de 50 pi']]};
+  var st={step:1,addr:null,dist:null,manual:false,mt:'borne',b:{lieu:null,amp:null,passage:null,achat:null,distm:null}};
+
+  function render(){
+    ['s1','s2','s3'].forEach(function(id,k){$('#'+id).hidden=st.step!==k+1;});
+    $('#hero').hidden=st.step!==1;
+    $('#steps').innerHTML=['1 · Votre borne','2 · Votre courriel','3 · Estimation'].map(function(l,k){var c=st.step===k+1?'on':(st.step>k+1?'done':'');return '<span class="step '+c+'">'+l+'</span>';}).join('');
+    $$('[data-q]').forEach(function(el){var k=el.getAttribute('data-q');el.innerHTML='';
+      Q[k].forEach(function(o){var b=document.createElement('button');b.type='button';b.className='pill'+(st.b[k]===o[0]?' on':'');b.textContent=o[1];b.setAttribute('aria-pressed',st.b[k]===o[0]);
+        b.onclick=function(){st.b[k]=o[0];if(k==='distm'){st.dist=Number(o[0]);showDist();}render();};el.appendChild(b);});});
+    $('#modele-wrap').hidden=st.b.achat!=='oui';
+    $('#manual').hidden=!st.manual;
+  }
+  function showDist(){$('#dist').textContent=st.dist?('≈ '+st.dist+' pi'+(st.manual?'':' ('+Math.round(st.dist/3.281)+' m)')):(markers.borne?'Placez le panneau':'Placez la borne');}
+
+  // Carte (Leaflet + imagerie satellite Esri)
+  var map=null,markers={borne:null,panneau:null},line=null,home=null;
+  function mapMsg(t){var m=$('#map-msg');m.textContent=t||'';m.style.display=t?'flex':'none';}
+  function pinIcon(kind){return L.divIcon({className:'',html:'<span class="pin '+(kind==='borne'?'pin-b':'pin-p')+'" style="width:34px;height:34px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.5)">'+(kind==='borne'?'VE':'P')+'</span>',iconSize:[34,34],iconAnchor:[17,17]});}
+  function updDist(){
+    if(line){map.removeLayer(line);line=null;}
+    if(markers.borne&&markers.panneau){var P=markers.panneau.getLatLng(),B=markers.borne.getLatLng(),K=L.latLng(P.lat,B.lng);
+      line=L.polyline([P,K,B],{color:'#FA890D',weight:4,dashArray:'8 6'}).addTo(map);
+      st.dist=Math.round((P.distanceTo(K)+K.distanceTo(B))*3.281);st.manual=false;}
+    else if(!st.manual) st.dist=null;
+    showDist();
+  }
+  function placeMarker(kind,ll){
+    if(markers[kind])markers[kind].setLatLng(ll);
+    else{markers[kind]=L.marker(ll,{icon:pinIcon(kind),draggable:true}).addTo(map);markers[kind].on('drag',updDist);}
+    if(kind==='borne'&&!markers.panneau){st.mt='panneau';renderTools();}
+    updDist();
+  }
+  function renderTools(){$$('#mapTools [data-mt]').forEach(function(b){var on=b.getAttribute('data-mt')===st.mt;b.className='tool'+(on?' on':'');b.setAttribute('aria-pressed',on);});}
+  $$('#mapTools [data-mt]').forEach(function(b){b.onclick=function(){st.mt=b.getAttribute('data-mt');renderTools();};});
+  function initMap(){
+    if(!window.L){mapMsg('La carte n’a pas pu se charger. Indiquez la distance vous-même, sous la carte.');st.manual=true;render();return;}
+    var c=st.addr?[st.addr.lat,st.addr.lon]:[45.307,-73.262];
+    if(!map){
+      map=L.map('map',{zoomControl:true,maxZoom:21,scrollWheelZoom:false}).setView(c,st.addr?19:13);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:21,maxNativeZoom:19,attribution:'Imagerie © Esri'}).addTo(map);
+      map.on('click',function(e){if(!st.addr){mapMsg('Entrez d’abord votre adresse, plus haut.');setTimeout(function(){mapMsg(st.addr?'':'Entrez votre adresse pour voir votre maison.');},1600);return;}placeMarker(st.mt,e.latlng);});
+    } else { map.setView(c,st.addr?19:13); }
+    if(st.addr){mapMsg('');if(home)map.removeLayer(home);home=L.circleMarker(c,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);}
+    else mapMsg('Entrez votre adresse pour voir votre maison.');
+    setTimeout(function(){map.invalidateSize();},60);
+  }
+  $('#noMap').onclick=function(){st.manual=true;if(markers.borne&&markers.panneau){}render();};
+
+  // Adresse : autocomplétion (Photon / OpenStreetMap)
+  var adr=$('#f-adr'),list=$('#adr-list'),tmr=null,lastQ='';
+  function fmt(p){return [[p.housenumber,p.street||p.name].filter(Boolean).join(' '),p.city||p.town||p.village,(p.state==='Québec'||p.state==='Quebec')?'QC':p.state,p.postcode].filter(Boolean).join(', ');}
+  function choose(t,x){adr.value=t;st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||''};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').hidden=false;initMap();}
+  adr.addEventListener('input',function(){
+    st.addr=null;$('#adr-ok').hidden=true;var q=adr.value.trim();clearTimeout(tmr);
+    if(q.length<4){list.hidden=true;adr.setAttribute('aria-expanded','false');return;}
+    tmr=setTimeout(function(){lastQ=q;
+      fetch('https://photon.komoot.io/api/?limit=6&lang=fr&lat=45.31&lon=-73.26&q='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
+        if(q!==lastQ)return;
+        var f=(j.features||[]).filter(function(x){return x.properties.countrycode==='CA';}).slice(0,5);
+        list.innerHTML='';
+        f.forEach(function(x){var li=document.createElement('li');li.setAttribute('role','option');li.tabIndex=-1;var t=fmt(x.properties);li.textContent=t;
+          li.onmousedown=function(e){e.preventDefault();choose(t,x);};li.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();choose(t,x);adr.focus();}};list.appendChild(li);});
+        list.hidden=!f.length;adr.setAttribute('aria-expanded',f.length?'true':'false');
+      }).catch(function(){list.hidden=true;});
+    },300);
+  });
+  adr.addEventListener('blur',function(){setTimeout(function(){list.hidden=true;},150);});
+  adr.addEventListener('keydown',function(e){var items=$$('li',list);if(list.hidden||!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();items[0].focus();}});
+  list.addEventListener('keydown',function(e){var items=$$('li',list),i=items.indexOf(document.activeElement);
+    if(e.key==='ArrowDown'){e.preventDefault();(items[i+1]||items[0]).focus();}
+    else if(e.key==='ArrowUp'){e.preventDefault();(items[i-1]||adr).focus();}
+    else if(e.key==='Escape'){list.hidden=true;adr.focus();}});
+
+  // Navigation
+  $('#toS2').onclick=function(){
+    var e=$('#err1'),miss=[];
+    if(!st.addr&&!adr.value.trim())miss.push('votre adresse');
+    if(!st.dist)miss.push(st.manual?'la distance':'la borne et le panneau sur la carte');
+    ['lieu','amp','passage','achat'].forEach(function(k){if(!st.b[k])miss.push({lieu:'l’emplacement',amp:'l’ampérage',passage:'le passage du câble',achat:'si vous avez votre borne'}[k]);});
+    if(miss.length){e.textContent='Il manque : '+miss.join(', ')+'.';e.hidden=false;return;}
+    e.hidden=true;st.step=2;render();window.scrollTo(0,0);setTimeout(function(){$('#f-prenom').focus();},50);
+  };
+  $('#back1').onclick=function(){st.step=1;render();window.scrollTo(0,0);setTimeout(function(){if(map)map.invalidateSize();},60);};
+
+  $('#form').addEventListener('submit',function(ev){
+    ev.preventDefault();
+    var e=$('#err2');e.hidden=true;
+    if($('#f-site').value)return;
+    var prenom=$('#f-prenom').value.trim(),mail=$('#f-mail').value.trim();
+    if(!prenom||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){e.textContent='Entrez votre prénom et un courriel valide.';e.hidden=false;return;}
+    if(!$('#f-consent').checked){e.textContent='Cochez la case pour qu’on puisse vous écrire.';e.hidden=false;return;}
+    var data={prenom:prenom,courriel:mail,consent:'oui',adresse:st.addr?st.addr.label:adr.value.trim(),ville:st.addr?st.addr.ville:'',
+      distance:st.dist,mesure:st.manual?'estimée par le client':'mesurée sur la carte',lieu:st.b.lieu,amp:st.b.amp,passage:st.b.passage,achat:st.b.achat,
+      marque:$('#f-marque').value,modele:$('#f-modele').value.trim(),
+      borneGPS:markers.borne?markers.borne.getLatLng().lat.toFixed(6)+','+markers.borne.getLatLng().lng.toFixed(6):'',
+      panneauGPS:markers.panneau?markers.panneau.getLatLng().lat.toFixed(6)+','+markers.panneau.getLatLng().lng.toFixed(6):''};
+    if(!ENDPOINT){e.textContent='L’envoi n’est pas encore activé sur cette page.';e.hidden=false;return;}
+    var b=$('#send');b.disabled=true;b.textContent='Envoi…';
+    fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if(j&&j.ok){$('#done-mail').textContent=mail;st.step=3;render();window.scrollTo(0,0);return;}
+        e.textContent=j&&j.err==='limite'?'Vous avez déjà demandé plusieurs estimations aujourd’hui. Réessayez demain ou répondez à notre courriel précédent.':'L’envoi n’a pas fonctionné. Vérifiez votre courriel et réessayez.';
+        e.hidden=false;b.disabled=false;b.textContent='Recevoir mon estimation par courriel';
+      })
+      .catch(function(){e.textContent='L’envoi n’a pas fonctionné. Vérifiez votre connexion et réessayez.';e.hidden=false;b.disabled=false;b.textContent='Recevoir mon estimation par courriel';});
+  });
+
+  render();renderTools();initMap();
+})();
+</script>
+</body>
+</html>
