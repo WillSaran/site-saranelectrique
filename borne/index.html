@@ -110,12 +110,20 @@ footer .wrap{padding-block:20px;display:flex;flex-wrap:wrap;gap:6px 18px;justify
 footer b{color:#fff}
 .hp{position:absolute;left:-9999px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.avis-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.avis{background:#fff;border:1px solid #E3E3E3;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px;margin:0}
+.avis blockquote{margin:0;color:#2b2b2b;line-height:1.55;font-size:15px}
+.avis figcaption{font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.avis figcaption small{font-weight:500;color:#6B6B6B}
+.stars{color:#FA890D;letter-spacing:2px;font-size:18px}
+.avis-top{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:22px}
+.avis-note{display:flex;align-items:center;gap:12px}.avis-note b{font-family:Rajdhani,sans-serif;font-size:44px;line-height:1}
 </style>
 </head>
 <body>
 
 <header class="pad"><div class="wrap">
-  <span class="brand"><img src="logo.jpeg" alt="">Saran Électrique</span>
+  <a class="brand" href="/" aria-label="Saran Électrique — accueil"><img src="logo.jpeg" alt="">Saran Électrique</a>
   <div class="steps" id="steps"></div>
 </div></header>
 
@@ -231,6 +239,11 @@ footer b{color:#fff}
 
 </div></main>
 
+<section class="pad" id="avis"><div class="wrap" style="display:block;padding-block:48px">
+  <div class="avis-top"><div><h2 style="margin:0 0 6px;font-size:36px">Ils ont fait installer leur borne avec nous</h2>
+  <div class="avis-note"><b>5,0</b><div><span class="stars" aria-hidden="true">★★★★★</span><div style="font-size:14px;color:#4D4D4D">21 avis sur Google</div></div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px"><a href="https://maps.google.com/?cid=12696884889997532405" target="_blank" rel="noopener" class="btn btn-outline" style="text-decoration:none">Voir tous nos avis sur Google ↗</a><a href="https://g.page/r/CfXcU1aJZTSwEB0/review" target="_blank" rel="noopener" class="btn btn-orange" style="text-decoration:none">Laisser un avis</a></div></div>
+  <div class="avis-grid"><figure class="avis"><span class="stars" aria-hidden="true">★★★★★</span><span class="sr-only" style="position:absolute;left:-9999px">5 étoiles sur 5</span><blockquote>« Je suis très satisfait du service de Saran Électrique pour l’installation de ma borne de recharge pour mon véhicule électrique. Le travail a été fait de façon professionnelle, propre et avec beaucoup de souci du détail. Je veux aussi souligner la qualité du personnel et leur excellent entregent : une équipe sympathique, courtoise, à l’écoute et qui prend le temps de bien répondre aux questions. »</blockquote><figcaption>Yvan L.<small>Avis Google</small></figcaption></figure><figure class="avis"><span class="stars" aria-hidden="true">★★★★★</span><span class="sr-only" style="position:absolute;left:-9999px">5 étoiles sur 5</span><blockquote>« Non seulement ils sont sympathiques ils sont aussi excellent et très compétent. Ils ont changé mon panneau et installer ma borne travail ultra bien fait et rapide. »</blockquote><figcaption>Nadine C.<small>Avis Google</small></figcaption></figure><figure class="avis"><span class="stars" aria-hidden="true">★★★★★</span><span class="sr-only" style="position:absolute;left:-9999px">5 étoiles sur 5</span><blockquote>« Service exceptionnel de la part de Saran Électrique. Ils sont venus à l’occasion de rénovations dans notre cuisine et ont fait une job merveilleuse. Je mettrais en valeur le service à la clientèle formidable : quelques petits soucis mineurs après les travaux, ils sont revenus rapidement afin de trouver la cause et de faire les ajustements en conséquence! »</blockquote><figcaption>Guillaume<small>Avis Google</small></figcaption></figure></div></div></section>
 <footer class="pad"><div class="wrap">
   <span><b>Saran Électrique inc.</b> · Saint-Jean-sur-Richelieu · RBQ 5819-9274-01</span>
   <span>Estimation indicative, avant taxes. Le prix final est confirmé par soumission écrite.</span>
