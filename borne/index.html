@@ -476,6 +476,40 @@ footer b{color:#fff}
   $('#back1').onclick=function(){goStep(2);};
 
 
+
+  // Image de la carte (maison, borne, panneau, trajet) jointe à la demande
+  function snapshot(){return new Promise(function(done){
+    try{
+    if(!map||st.manual||!(markers.borne||home)){done(null);return;}
+    var pts=[];if(home)pts.push(home.getLatLng());if(markers.borne)pts.push(markers.borne.getLatLng());if(markers.panneau)pts.push(markers.panneau.getLatLng());
+    var Z=Math.min(20,Math.round(map.getZoom())),box;
+    function bb(){var ps=pts.map(function(l){return map.project(l,Z);}),xs=ps.map(function(p){return p.x;}),ys=ps.map(function(p){return p.y;});
+      var x0=Math.min.apply(0,xs)-110,x1=Math.max.apply(0,xs)+110,y0=Math.min.apply(0,ys)-90,y1=Math.max.apply(0,ys)+90;
+      var W=Math.max(640,x1-x0),H=Math.max(440,y1-y0),cx=(x0+x1)/2,cy=(y0+y1)/2;return {x:Math.round(cx-W/2),y:Math.round(cy-H/2),w:Math.round(W),h:Math.round(H)};}
+    box=bb();while((box.w>1100||box.h>900)&&Z>15){Z--;box=bb();}
+    var cv=document.createElement('canvas');cv.width=box.w;cv.height=box.h;var g=cv.getContext('2d');g.fillStyle='#333';g.fillRect(0,0,box.w,box.h);
+    var qc=!fallback,n=Math.pow(2,Z),tx0=Math.floor(box.x/256),tx1=Math.floor((box.x+box.w)/256),ty0=Math.floor(box.y/256),ty1=Math.floor((box.y+box.h)/256),jobs=[];
+    for(var tx=tx0;tx<=tx1;tx++)for(var ty=ty0;ty<=ty1;ty++)(function(tx,ty){jobs.push(new Promise(function(ok){var im=new Image();im.crossOrigin='anonymous';
+      im.onload=function(){g.drawImage(im,tx*256-box.x,ty*256-box.y,256,256);ok();};im.onerror=function(){ok();};
+      im.src=qc?'https://geoegl.msp.gouv.qc.ca/apis/carto/tms/1.0.0/orthos@EPSG_3857/'+Z+'/'+tx+'/'+(n-1-ty)+'.jpeg':'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/'+Z+'/'+ty+'/'+tx;}));})(tx,ty);
+    var t=setTimeout(function(){done(null);},8000);
+    Promise.all(jobs).then(function(){
+      function c(l){var p=map.project(l,Z);return [p.x-box.x,p.y-box.y];}
+      var a=st.ang*Math.PI/180;
+      if(home){var h=c(home.getLatLng()),r=140*Math.pow(2,Z-21);g.save();g.translate(h[0],h[1]);g.rotate(a);g.setLineDash([8,8]);g.strokeStyle='#FA890D';g.lineWidth=3;g.strokeRect(-r,-r,2*r,2*r);g.restore();}
+      if(markers.borne&&markers.panneau){var P=c(markers.panneau.getLatLng()),B=c(markers.borne.getLatLng()),u=[Math.cos(a),Math.sin(a)],dx=B[0]-P[0],dy=B[1]-P[1],l1=dx*u[0]+dy*u[1],K=[P[0]+l1*u[0],P[1]+l1*u[1]];
+        g.setLineDash([12,8]);g.strokeStyle='#FA890D';g.lineWidth=5;g.beginPath();g.moveTo(P[0],P[1]);g.lineTo(K[0],K[1]);g.lineTo(B[0],B[1]);g.stroke();g.setLineDash([]);}
+      function dot(l,col,txt){var q=c(l);g.beginPath();g.arc(q[0],q[1],10,0,7);g.fillStyle=col;g.fill();g.lineWidth=3;g.strokeStyle='#fff';g.stroke();
+        g.font='bold 15px Inter, Arial, sans-serif';var w=g.measureText(txt).width+20;g.fillStyle='rgba(20,20,20,.88)';g.beginPath();if(g.roundRect)g.roundRect(q[0]+16,q[1]-34,w,26,13);else g.rect(q[0]+16,q[1]-34,w,26);g.fill();g.fillStyle='#fff';g.fillText(txt,q[0]+26,q[1]-16);}
+      if(markers.borne)dot(markers.borne.getLatLng(),'#22a35a','Borne de recharge');
+      if(markers.panneau)dot(markers.panneau.getLatLng(),'#FA890D','Panneau électrique');
+      g.fillStyle='rgba(20,20,20,.85)';g.fillRect(0,box.h-34,box.w,34);g.fillStyle='#fff';g.font='bold 15px Inter, Arial, sans-serif';
+      g.fillText('Saran Électrique · '+(st.dist?'≈ '+st.dist+' pi de câble (à 90°, le long des murs)':'Emplacement indiqué par le client'),12,box.h-12);
+      clearTimeout(t);var u2=cv.toDataURL('image/jpeg',0.85);done(u2.split(',')[1]);
+    }).catch(function(){clearTimeout(t);done(null);});
+    }catch(e){done(null);}
+  });}
+  window.__snap=snapshot;
   // Photos : réduites dans le navigateur (1600 px) avant l'envoi
   var photos=[];
   function shrink(file){return new Promise(function(ok){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,1600/Math.max(im.width,im.height));var c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);var u=c.toDataURL('image/jpeg',0.82);ok({n:(file.name||'photo').replace(/\.[^.]+$/,'')+'.jpg',type:'image/jpeg',b64:u.split(',')[1],url:u});};im.onerror=function(){ok(null);};im.src=r.result;};r.onerror=function(){ok(null);};r.readAsDataURL(file);});}
@@ -497,7 +531,7 @@ footer b{color:#fff}
       photos:photos.map(function(p){return {n:p.n,type:p.type,b64:p.b64};})};
     if(!ENDPOINT){e.textContent='L’envoi n’est pas encore activé sur cette page.';e.hidden=false;return;}
     var b=$('#send');b.disabled=true;b.textContent=photos.length?'Envoi des photos…':'Envoi…';
-    fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)})
+    snapshot().then(function(img){if(img)data.carte=img;return fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});})
       .then(function(r){return r.json();})
       .then(function(j){
         if(j&&j.ok){b.disabled=false;$('#done-mail').textContent=mail;if(photos.length){var dn=$('#s3 .card .note');if(dn)dn.textContent='Merci pour vos '+photos.length+' photo(s), on les a reçues. Pour une soumission détaillée ou une visite, répondez simplement à notre courriel.';}st.step=4;st.max=4;render();window.scrollTo(0,0);return;}
