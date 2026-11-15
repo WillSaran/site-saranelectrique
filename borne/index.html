@@ -33,6 +33,7 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1
 .steps{display:flex;gap:8px;flex-wrap:wrap}
 .step{padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600;color:#A6A6A6;border:1px solid #333}
 .step.on{background:var(--orange);color:var(--ink);border-color:var(--orange)}.step.done{background:#333;color:#fff}
+.step[data-s]{cursor:pointer}.step[data-s]:hover{border-color:var(--orange);color:#fff}
 @media(max-width:640px){header .wrap{flex-wrap:wrap;row-gap:10px}.steps{width:100%;flex-wrap:nowrap;gap:6px}.step{flex:1 1 0;min-width:0;text-align:center;padding:6px 6px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 .hero{background:var(--ink);color:#fff}
 .hero .wrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px;align-items:center;padding-block:28px 40px}
@@ -181,8 +182,6 @@ footer b{color:#fff}
     </div>
     <div class="fld" style="flex:0 1 150px"><label for="f-unite">App. / unité</label><input id="f-unite" autocomplete="address-line2" placeholder="ex. 204"></div>
     </div>
-    <div style="margin-top:14px"><p class="q" style="margin-bottom:8px">Type de bâtiment <span style="font-weight:400;color:var(--mute)">(facultatif)</span></p><div class="pills" data-q="bat"></div>
-      <p class="note" id="bat-note" hidden style="margin:10px 0 0;max-width:720px;background:#FFF4E6;border:1px solid #FA890D;border-radius:10px;padding:10px 12px;color:#4D4D4D">En condo, en appartement ou en plex, l’installation est souvent plus complexe : panneau et stationnement parfois éloignés, accord du syndicat ou du propriétaire, et possiblement un <b>contrôleur de charge</b> si la capacité électrique est limitée. On vous donne une estimation de départ, puis on évalue les travaux avec vous.</p></div>
     <p class="adr-alt">Vous pouvez aussi écrire seulement votre <b>code postal</b>. Adresse introuvable? <button type="button" id="skipMap2">Donnez plutôt une distance approximative entre le panneau et la borne</button>.</p>
 
     <div class="cols" style="margin-top:22px">
@@ -214,8 +213,20 @@ footer b{color:#fff}
         <div class="distbox">
           <h3>Distance estimée</h3>
           <span id="dist">—</span>
-          <small>Trajet du câble à angle droit (90°), comme le long des murs, entre le panneau et la borne. On confirme la mesure avec vous.</small>
+          <small>Longueur du câble entre le panneau et la borne, en ligne droite ou en contournant un coin. On confirme la mesure avec vous.</small>
         </div>
+      </div>
+    </div>
+    <div class="bar"><span></span><button class="btn btn-dark" id="toS1b" type="button">Continuer → Quelques détails</button></div>
+  </section>
+
+  <!-- Étape 2 : détails -->
+  <section id="s1b" hidden>
+    <h2 class="t">Quelques détails</h2>
+    <p class="sub">Répondez à ce que vous savez : ce qui manque, on le confirmera avec vous.</p>
+    <div class="card" style="max-width:820px;display:flex;flex-direction:column;gap:20px">
+      <div><p class="q" style="margin-bottom:8px">Type de bâtiment <span style="font-weight:400;color:var(--mute)">(facultatif)</span></p><div class="pills" data-q="bat"></div>
+      <p class="note" id="bat-note" hidden style="margin:10px 0 0;max-width:720px;background:#FFF4E6;border:1px solid #FA890D;border-radius:10px;padding:10px 12px;color:#4D4D4D">En condo, en appartement ou en plex, l’installation est souvent plus complexe : panneau et stationnement parfois éloignés, accord du syndicat ou du propriétaire, et possiblement un <b>contrôleur de charge</b> si la capacité électrique est limitée. On vous donne une estimation de départ, puis on évalue les travaux avec vous.</p></div>
         <div><p class="q">Où sera la borne ?</p><div class="pills" data-q="lieu"></div></div>
         <div><p class="q">Ampérage de votre panneau</p><div class="pills" data-q="amp"></div></div>
         <div><p class="q">Le câble passera…</p><div class="pills" data-q="passage"></div></div>
@@ -225,10 +236,9 @@ footer b{color:#fff}
             <div class="fld"><label for="f-modele">Modèle</label><input id="f-modele" placeholder="ex. FLO Home X5, Grizzl-E Classic…"></div>
           </div>
         </div>
-      </div>
     </div>
     <p class="err" id="err1" hidden></p>
-    <div class="bar"><span></span><button class="btn btn-dark" id="toS2" type="button">Continuer → Recevoir mon estimation</button></div>
+    <div class="bar"><button class="btn btn-outline" id="back0" type="button">← Retour</button><button class="btn btn-dark" id="toS2" type="button">Continuer → Recevoir mon estimation</button></div>
   </section>
 
   <!-- Étape 2 : courriel -->
@@ -304,12 +314,12 @@ footer b{color:#fff}
     achat:[['oui','Oui, je l’ai'],['non','Non, fournissez-la-moi']],
     bat:[['maison','Maison'],['multi','Condo / appartement / plex'],['commerce','Commerce']],
     distm:[['10','Moins de 15 pi'],['25','15 à 30 pi'],['40','30 à 50 pi'],['60','Plus de 50 pi']]};
-  var st={step:1,route:'droit',houseSet:false,addr:null,dist:null,manual:false,mt:'borne',b:{bat:null,lieu:null,amp:null,passage:null,achat:null,distm:null}};
+  var st={step:1,max:1,route:'droit',houseSet:false,addr:null,dist:null,manual:false,mt:'borne',b:{bat:null,lieu:null,amp:null,passage:null,achat:null,distm:null}};
 
   function render(){
-    ['s1','s2','s3'].forEach(function(id,k){$('#'+id).hidden=st.step!==k+1;});
+    ['s1','s1b','s2','s3'].forEach(function(id,k){$('#'+id).hidden=st.step!==k+1;});
     $('#hero').hidden=st.step!==1;
-    $('#steps').innerHTML=['1 · Votre borne','2 · Votre courriel','3 · Estimation'].map(function(l,k){var c=st.step===k+1?'on':(st.step>k+1?'done':'');return '<span class="step '+c+'">'+l+'</span>';}).join('');
+    $('#steps').innerHTML=['1 · Lieu','2 · Détails','3 · Courriel','4 · Estimation'].map(function(l,k){var n=k+1,c=st.step===n?'on':(st.step>n?'done':''),go=n!==st.step&&st.step!==4&&n<=3&&n<=st.max;return '<span class="step '+c+'"'+(go?' data-s="'+n+'" role="button" tabindex="0"':'')+'>'+l+'</span>';}).join('');
     var uni=$('#f-unite');if(uni&&uni.value.trim()&&!st.b.bat)st.b.bat='multi';
     $('#bat-note').hidden=st.b.bat!=='multi';
     $$('[data-q]').forEach(function(el){var k=el.getAttribute('data-q');el.innerHTML='';
@@ -437,11 +447,17 @@ footer b{color:#fff}
   $('#f-unite').addEventListener('change',function(){if(this.value.trim()&&!st.b.bat){st.b.bat='multi';render();}});
 
   // Navigation
+  function goStep(n){st.step=n;st.max=Math.max(st.max,n);render();window.scrollTo(0,0);
+    if(n===1&&map)setTimeout(function(){map.invalidateSize();},60);if(n===3)setTimeout(function(){$('#f-prenom').focus();},50);}
+  $('#steps').addEventListener('click',function(e){var t=e.target.closest('[data-s]');if(t)goStep(Number(t.getAttribute('data-s')));});
+  $('#steps').addEventListener('keydown',function(e){var t=e.target.closest('[data-s]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();goStep(Number(t.getAttribute('data-s')));}});
+  $('#toS1b').onclick=function(){goStep(2);};
+  $('#back0').onclick=function(){goStep(1);};
   $('#toS2').onclick=function(){
     // Rien n'est obligatoire à cette étape : ce qui manque sera confirmé avec le client.
-    $('#err1').hidden=true;st.step=2;render();window.scrollTo(0,0);setTimeout(function(){$('#f-prenom').focus();},50);
+    $('#err1').hidden=true;goStep(3);
   };
-  $('#back1').onclick=function(){st.step=1;render();window.scrollTo(0,0);setTimeout(function(){if(map)map.invalidateSize();},60);};
+  $('#back1').onclick=function(){goStep(2);};
 
 
   // Photos : réduites dans le navigateur (1600 px) avant l'envoi
@@ -467,7 +483,7 @@ footer b{color:#fff}
     fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)})
       .then(function(r){return r.json();})
       .then(function(j){
-        if(j&&j.ok){b.disabled=false;$('#done-mail').textContent=mail;if(photos.length){var dn=$('#s3 .card .note');if(dn)dn.textContent='Merci pour vos '+photos.length+' photo(s), on les a reçues. Pour une soumission détaillée ou une visite, répondez simplement à notre courriel.';}st.step=3;render();window.scrollTo(0,0);return;}
+        if(j&&j.ok){b.disabled=false;$('#done-mail').textContent=mail;if(photos.length){var dn=$('#s3 .card .note');if(dn)dn.textContent='Merci pour vos '+photos.length+' photo(s), on les a reçues. Pour une soumission détaillée ou une visite, répondez simplement à notre courriel.';}st.step=4;st.max=4;render();window.scrollTo(0,0);return;}
         e.textContent=j&&j.err==='limite'?'Vous avez déjà demandé plusieurs estimations aujourd’hui. Réessayez demain ou répondez à notre courriel précédent.':'L’envoi n’a pas fonctionné. Vérifiez votre courriel et réessayez.';
         e.hidden=false;b.disabled=false;render();
       })
