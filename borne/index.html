@@ -202,7 +202,8 @@ footer b{color:#fff}
             <button type="button" id="reset" class="mb" style="margin-left:8px">↺ Recommencer</button>
           </div>
         </div>
-        <p class="note" style="margin:0">Vous pouvez zoomer avec <b>+</b> et <b>−</b>.</p>
+        <p class="note" style="margin:0">Vous pouvez zoomer avec <b>+</b> et <b>−</b> (ou avec deux doigts).</p>
+        <div id="routeQ" hidden style="margin-top:10px"><p class="q" style="margin-bottom:8px">Le câble entre le panneau et la borne va…</p><div class="pills"><button type="button" class="pill" data-route="droit">En ligne droite (même mur)</button><button type="button" class="pill" data-route="coin">En contournant un coin</button></div></div>
         </div>
         <div id="manual" hidden>
           <p class="q">Distance approximative entre le panneau et la borne, en suivant les murs</p>
@@ -303,7 +304,7 @@ footer b{color:#fff}
     achat:[['oui','Oui, je l’ai'],['non','Non, fournissez-la-moi']],
     bat:[['maison','Maison'],['multi','Condo / appartement / plex'],['commerce','Commerce']],
     distm:[['10','Moins de 15 pi'],['25','15 à 30 pi'],['40','30 à 50 pi'],['60','Plus de 50 pi']]};
-  var st={step:1,addr:null,dist:null,manual:false,mt:'borne',b:{bat:null,lieu:null,amp:null,passage:null,achat:null,distm:null}};
+  var st={step:1,route:'droit',houseSet:false,addr:null,dist:null,manual:false,mt:'borne',b:{bat:null,lieu:null,amp:null,passage:null,achat:null,distm:null}};
 
   function render(){
     ['s1','s2','s3'].forEach(function(id,k){$('#'+id).hidden=st.step!==k+1;});
@@ -329,7 +330,8 @@ footer b{color:#fff}
     $('#s3s').textContent=com?'Nous vous avons écrit à':'Nous venons de l’envoyer à';
     $('#s3c').textContent=com?'Pour planifier la visite':'Pour une soumission détaillée ou une visite';
   }
-  function showDist(){$('#dist').textContent=st.dist?('≈ '+st.dist+' pi'+(st.manual?'':' ('+Math.round(st.dist/3.281)+' m)')):(markers.borne?'Placez le panneau':'Placez la borne');}
+  function showDist(){$('#dist').textContent=st.dist?('≈ '+st.dist+' pi'+(st.manual?'':' ('+Math.round(st.dist/3.281)+' m)'+(st.route==='coin'?', avec un coin':', en ligne droite'))):(markers.borne?'Placez le panneau':'Placez la borne');
+    var rq=$('#routeQ');if(rq){rq.hidden=!(markers.borne&&markers.panneau);$$('[data-route]',rq).forEach(function(b){b.className='pill'+(st.route===b.getAttribute('data-route')?' on':'');});}}
 
   // Carte (Leaflet + imagerie satellite Esri)
   var map=null,markers={borne:null,panneau:null},line=null,home=null;
@@ -339,9 +341,10 @@ footer b{color:#fff}
     return L.divIcon({className:'',html:'<div class="mk '+(B?'mk-b':'mk-p')+'">'+svg+'<span class="lbl">'+(B?'Borne de recharge':'Panneau électrique')+'</span><i class="dot"></i></div>',iconSize:[0,0],iconAnchor:[0,0]});}
   function updDist(){
     if(line){map.removeLayer(line);line=null;}
-    if(markers.borne&&markers.panneau){var P=markers.panneau.getLatLng(),B=markers.borne.getLatLng(),K=L.latLng(P.lat,B.lng);
-      line=L.polyline([P,K,B],{color:'#FA890D',weight:4,dashArray:'8 6'}).addTo(map);
-      st.dist=Math.round((P.distanceTo(K)+K.distanceTo(B))*3.281);st.manual=false;}
+    if(markers.borne&&markers.panneau){var P=markers.panneau.getLatLng(),B=markers.borne.getLatLng(),d=P.distanceTo(B);
+      // Ligne droite si les deux sont sur le même mur; sinon on ajoute le détour d'un coin (environ 30 % de plus), peu importe l'angle de la maison.
+      line=L.polyline([P,B],{color:'#FA890D',weight:4,dashArray:'8 6'}).addTo(map);
+      st.dist=Math.max(1,Math.round(d*3.281*(st.route==='coin'?1.3:1)));st.manual=false;}
     else if(!st.manual) st.dist=null;
     showDist();
   }
@@ -351,17 +354,17 @@ footer b{color:#fff}
     if(kind==='borne'&&!markers.panneau)st.mt='panneau';
     updDist();renderTools();
   }
-  function ready(){return !!(st.addr||st.free);}
+  function ready(){return true;}
+  function needHouse(){return (!st.addr||!!st.addr.z)&&!st.houseSet&&!markers.borne;}
   function renderTools(){
     $$('#mapTools [data-mt]').forEach(function(b){var k=b.getAttribute('data-mt'),on=k===st.mt;b.className='tool'+(on?' on':'')+(markers&&markers[k]?' placed':'');b.setAttribute('aria-pressed',on);});
     var g=$('#guide'),hasB=markers.borne,hasP=markers.panneau;
-    if(!ready()){g.className='guide';g.innerHTML='<span class="big">↑</span><span>Entrez d’abord votre adresse ou votre code postal<small>Votre maison apparaîtra sur la carte. Vous pouvez aussi la chercher vous-même sur la carte.</small></span>';}
-    else if(((st.free&&!st.addr)||(st.addr&&st.addr.z))&&!hasB&&!st.manual){g.className='guide';g.innerHTML='<span class="big">1</span><span>Déplacez et zoomez la carte jusqu’à votre maison<small>Puis touchez l’endroit où vous voulez la borne.</small></span>';}
+    if(needHouse()&&!st.manual){g.className='guide';g.innerHTML='<span class="big">⌂</span><span>'+(st.addr?'Touchez votre maison sur la carte':'Entrez votre adresse, ou touchez votre maison sur la carte')+'<small>Zoomez et déplacez la carte au besoin : on va centrer et agrandir votre maison.</small></span>';}
     else if(st.manual&&!(hasB&&hasP)){g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Distance choisie à la main<small>'+(st.skip?'Choisissez la distance approximative ci-dessous.':'Vous pouvez quand même placer les points sur la carte pour plus de précision.')+'</small></span>';}
     else if(st.mt==='borne'&&!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">1</span><span>Touchez la carte à l’endroit où vous voulez la borne<small>Par exemple, le mur du garage ou près de l’entrée de cour.</small></span>';}
     else if(!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">2</span><span>Touchez maintenant l’endroit où se trouve votre panneau électrique<small>Si vous ne savez pas exactement, placez-le environ dans la pièce où il se trouve.</small></span>';}
     else{g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Parfait! La distance est calculée.<small>Glissez les points pour ajuster, puis répondez aux questions.</small></span>';}
-    var t=$('#tapHint');if(t)t.hidden=!ready()||(hasB&&hasP);if(t)t.textContent=st.mt==='borne'?'👆 Touchez pour placer la borne':'👆 Touchez pour placer le panneau';
+    var t=$('#tapHint');if(t)t.hidden=!ready()||(hasB&&hasP);if(t)t.textContent=needHouse()?'👆 Touchez votre maison':(st.mt==='borne'?'👆 Touchez pour placer la borne':'👆 Touchez pour placer le panneau');
   }
   $$('#mapTools [data-mt]').forEach(function(b){b.onclick=function(){st.mt=b.getAttribute('data-mt');renderTools();};});
   function initMap(){
@@ -373,17 +376,19 @@ footer b{color:#fff}
       plan=L.tileLayer('https://geoegl.msp.gouv.qc.ca/apis/carto/tms/1.0.0/orthos@EPSG_3857/{z}/{x}/{y}.jpeg',{tms:true,maxZoom:21,maxNativeZoom:20,attribution:'Photo aérienne © Gouvernement du Québec'}).addTo(map);
       plan.on('tileerror',function(){if(!fallback){fallback=true;vue(false);}});
       var hint=document.createElement('div');hint.className='tap';hint.id='tapHint';hint.hidden=true;$('#map').parentNode.appendChild(hint);
-      map.on('click',function(e){if(!ready()){mapMsg('Entrez d’abord votre adresse, plus haut, ou choisissez « Trouver ma maison directement sur la carte ».');setTimeout(function(){mapMsg(ready()?'':'Entrez votre adresse pour voir votre maison.');},2200);return;}if(!st.addr&&map.getZoom()<17){mapMsg('Zoomez davantage sur votre maison avant de placer les points.');setTimeout(function(){mapMsg('');},1800);return;}placeMarker(st.mt,e.latlng);});
-    } else if(st.addr||!st.free){ map.setView(c,z); }
-    if(st.addr){mapMsg('');if(home)map.removeLayer(home);home=L.circleMarker(c,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);}
-    else mapMsg(st.free?'':'Entrez votre adresse pour voir votre maison.');
+      map.on('click',function(e){mapMsg('');
+        if(needHouse()){st.houseSet=true;st.free=true;if(home)map.removeLayer(home);home=L.circleMarker(e.latlng,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);map.setView(e.latlng,Math.max(map.getZoom(),20));renderTools();return;}
+        placeMarker(st.mt,e.latlng);});
+    } else if(st.addr){ map.setView(c,z); }
+    mapMsg('');if(st.addr&&!st.addr.z){st.houseSet=true;if(home)map.removeLayer(home);home=L.circleMarker(c,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);}
     renderTools();
     setTimeout(function(){map.invalidateSize();},60);
   }
   var sat=null,plan=null,fallback=false;
   function vue(p){if(!map)return;if(p){map.removeLayer(sat);plan.addTo(map);}else{map.removeLayer(plan);sat.addTo(map);}}
+  $$('[data-route]').forEach(function(b){b.onclick=function(){st.route=b.getAttribute('data-route');updDist();};});
   $('#reset').onclick=function(){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}
-    if(!st.manual)st.dist=null;st.mt='borne';showDist();renderTools();};
+    if(!st.manual)st.dist=null;st.mt='borne';if(!st.addr||st.addr.z){st.houseSet=false;if(home){map.removeLayer(home);home=null;}}showDist();renderTools();};
   $('#skipMap').onclick=function(){st.skip=!st.skip;st.manual=st.skip?true:st.manual;render();renderTools();
     if(st.skip){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});}else if(map){setTimeout(function(){map.invalidateSize();},50);}};
 
@@ -397,7 +402,7 @@ footer b{color:#fff}
   var adr=$('#f-adr'),list=$('#adr-list'),tmr=null,lastQ='';
   function fmt(p){return [[p.housenumber,p.street||p.name].filter(Boolean).join(' '),p.city||p.town||p.village,(p.state==='Québec'||p.state==='Quebec')?'QC':p.state,p.postcode].filter(Boolean).join(', ');}
   function choose(t,x,z){adr.value=t;adr.blur();st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||'',z:z||20};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=z?'✓ Secteur trouvé : zoomez sur votre maison, puis placez la borne':'✓ Adresse trouvée';$('#adr-ok').hidden=false;initMap();}
-  function goManual(){adr.blur();st.skip=true;st.manual=true;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent='✓ Adresse notée : indiquez maintenant la distance approximative entre le panneau et la borne.';$('#adr-ok').hidden=false;render();renderTools();setTimeout(function(){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});},120);}
+  function goManual(){adr.blur();st.addr=null;st.free=false;st.houseSet=false;if(map){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}if(home){map.removeLayer(home);home=null;}}st.dist=st.b.distm?Number(st.b.distm):null;st.skip=true;st.manual=true;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent='✓ Adresse notée : indiquez maintenant la distance approximative entre le panneau et la borne.';$('#adr-ok').hidden=false;render();renderTools();setTimeout(function(){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});},120);}
   function goFree(){adr.blur();st.free=true;st.skip=false;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=adr.value.trim()?'✓ Adresse notée : trouvez maintenant votre maison sur la carte':'Trouvez votre maison sur la carte';$('#adr-ok').hidden=false;render();initMap();setTimeout(function(){$('#map').scrollIntoView({behavior:'smooth',block:'center'});},80);}
   $('#skipMap2').onclick=goManual;
   var CP=/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
@@ -413,16 +418,17 @@ footer b{color:#fff}
           li._pick=function(){choose(t,x);};li.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();choose(t,x);}};list.appendChild(li);});
         if(cp){var pc=q.toUpperCase().replace(/^(...) ?(...)$/,'$1 $2');var hit=f.filter(function(x){return (x.properties.postcode||'').toUpperCase().replace(/\s/g,'')===pc.replace(/\s/g,'');})[0]||f[0];
           list.innerHTML='';if(hit){var li0=document.createElement('li');li0.setAttribute('role','option');li0.tabIndex=-1;li0.textContent='Code postal '+pc+' (secteur)';li0._pick=function(){choose('Code postal '+pc,hit,17);};list.appendChild(li0);}}
-        var la=document.createElement('li');la.className='alt';la.setAttribute('role','option');la.tabIndex=-1;la.textContent='Adresse pas dans la liste? Garder ce que j’ai écrit et donner une distance approximative →';la._pick=goManual;la.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();goManual();}};list.appendChild(la);
+        var la=document.createElement('li');la.className='alt';la.setAttribute('role','option');la.tabIndex=-1;la.textContent='✗ Je ne trouve pas mon adresse : garder ce que j’ai écrit et donner une distance approximative →';la._pick=goManual;la.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();goManual();}};list.appendChild(la);
         list.hidden=false;adr.setAttribute('aria-expanded','true');
-      }).catch(function(){if(q!==lastQ)return;list.innerHTML='';var la=document.createElement('li');la.className='alt';la.setAttribute('role','option');la.tabIndex=-1;la.textContent='Adresse pas dans la liste? Garder ce que j’ai écrit et donner une distance approximative →';la._pick=goManual;list.appendChild(la);list.hidden=false;adr.setAttribute('aria-expanded','true');});
+      }).catch(function(){if(q!==lastQ)return;list.innerHTML='';var la=document.createElement('li');la.className='alt';la.setAttribute('role','option');la.tabIndex=-1;la.textContent='✗ Je ne trouve pas mon adresse : garder ce que j’ai écrit et donner une distance approximative →';la._pick=goManual;list.appendChild(la);list.hidden=false;adr.setAttribute('aria-expanded','true');});
     },300);
   });
-  adr.addEventListener('blur',function(){setTimeout(function(){list.hidden=true;},400);});
+  
   // Choix dans la liste : réagit dès que le doigt touche (cellulaire), puis ferme le clavier
   var lastPick=0;function pickEv(e){var li=e.target.closest&&e.target.closest('li');if(!li||!li._pick)return;e.preventDefault();if(Date.now()-lastPick<700)return;lastPick=Date.now();li._pick();}
-  list.addEventListener('pointerdown',pickEv);list.addEventListener('mousedown',pickEv);list.addEventListener('click',pickEv);
-  adr.addEventListener('keydown',function(e){var items=$$('li',list);if(e.key==='Enter'&&!st.addr&&items.length&&!list.hidden){e.preventDefault();items[0]._pick();return;}if(e.key==='Enter'&&!st.addr&&adr.value.trim()){e.preventDefault();goManual();return;}if(list.hidden||!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();items[0].focus();}});
+  list.addEventListener('mousedown',function(e){e.preventDefault();});list.addEventListener('click',pickEv);
+  document.addEventListener('click',function(e){if(!list.hidden&&e.target!==adr&&!list.contains(e.target)){list.hidden=true;adr.setAttribute('aria-expanded','false');}});
+  adr.addEventListener('keydown',function(e){var items=$$('li',list);if(e.key==='Enter'){e.preventDefault();adr.blur();return;}if(list.hidden||!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();items[0].focus();}});
   list.addEventListener('keydown',function(e){var items=$$('li',list),i=items.indexOf(document.activeElement);
     if(e.key==='ArrowDown'){e.preventDefault();(items[i+1]||items[0]).focus();}
     else if(e.key==='ArrowUp'){e.preventDefault();(items[i-1]||adr).focus();}
