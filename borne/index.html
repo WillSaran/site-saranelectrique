@@ -53,6 +53,8 @@ main .wrap{padding-block:36px 64px}
 #adr-list li{padding:10px 12px;border-radius:8px;cursor:pointer}
 #adr-list li:hover,#adr-list li:focus{background:var(--soft);outline:0}
 .adr-ok{color:#1d7a46;font-size:13px;font-weight:600}
+.adr-alt{font-size:14px;color:var(--mute);margin:8px 0 0;line-height:1.7}.adr-alt button{background:none;border:0;padding:0;font:inherit;font-weight:600;color:#995000;text-decoration:underline;cursor:pointer}
+#adr-list li.alt{color:#995000;font-weight:600;border-top:1px solid var(--line);margin-top:4px}
 .cols{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
 .cols>.left{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:12px}
 .cols>.right{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:18px}
@@ -167,6 +169,7 @@ footer b{color:#fff}
       <ul id="adr-list" role="listbox" hidden></ul>
       <span id="adr-ok" class="adr-ok" hidden>✓ Adresse trouvée</span>
     </div>
+    <p class="adr-alt">Vous pouvez aussi écrire seulement votre <b>code postal</b>. Adresse introuvable? <button type="button" id="freeMap">Trouver ma maison directement sur la carte</button> ou <button type="button" id="skipMap2">donner une distance approximative</button>.</p>
 
     <div class="cols" style="margin-top:22px">
       <div class="left">
@@ -320,30 +323,32 @@ footer b{color:#fff}
     if(kind==='borne'&&!markers.panneau)st.mt='panneau';
     updDist();renderTools();
   }
+  function ready(){return !!(st.addr||st.free);}
   function renderTools(){
     $$('#mapTools [data-mt]').forEach(function(b){var k=b.getAttribute('data-mt'),on=k===st.mt;b.className='tool'+(on?' on':'')+(markers&&markers[k]?' placed':'');b.setAttribute('aria-pressed',on);});
     var g=$('#guide'),hasB=markers.borne,hasP=markers.panneau;
-    if(!st.addr){g.className='guide';g.innerHTML='<span class="big">↑</span><span>Entrez d’abord votre adresse<small>Votre maison apparaîtra sur la carte.</small></span>';}
+    if(!ready()){g.className='guide';g.innerHTML='<span class="big">↑</span><span>Entrez d’abord votre adresse ou votre code postal<small>Votre maison apparaîtra sur la carte. Vous pouvez aussi la chercher vous-même sur la carte.</small></span>';}
+    else if(st.free&&!st.addr&&!hasB&&!st.manual){g.className='guide';g.innerHTML='<span class="big">1</span><span>Déplacez et zoomez la carte jusqu’à votre maison<small>Puis touchez l’endroit où vous voulez la borne.</small></span>';}
     else if(st.manual&&!(hasB&&hasP)){g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Distance choisie à la main<small>'+(st.skip?'Choisissez la distance approximative ci-dessous.':'Vous pouvez quand même placer les points sur la carte pour plus de précision.')+'</small></span>';}
     else if(st.mt==='borne'&&!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">1</span><span>Touchez la carte à l’endroit où vous voulez la borne<small>Par exemple, le mur du garage ou près de l’entrée de cour.</small></span>';}
     else if(!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">2</span><span>Touchez maintenant l’endroit où se trouve votre panneau électrique<small>Si vous ne savez pas exactement, placez-le environ dans la pièce où il se trouve.</small></span>';}
     else{g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Parfait! La distance est calculée.<small>Glissez les points pour ajuster, puis répondez aux questions.</small></span>';}
-    var t=$('#tapHint');if(t)t.hidden=!st.addr||(hasB&&hasP);if(t)t.textContent=st.mt==='borne'?'👆 Touchez pour placer la borne':'👆 Touchez pour placer le panneau';
+    var t=$('#tapHint');if(t)t.hidden=!ready()||(hasB&&hasP);if(t)t.textContent=st.mt==='borne'?'👆 Touchez pour placer la borne':'👆 Touchez pour placer le panneau';
   }
   $$('#mapTools [data-mt]').forEach(function(b){b.onclick=function(){st.mt=b.getAttribute('data-mt');renderTools();};});
   function initMap(){
     if(!window.L){mapMsg('La carte n’a pas pu se charger. Indiquez la distance vous-même, sous la carte.');st.manual=true;render();return;}
-    var c=st.addr?[st.addr.lat,st.addr.lon]:[45.307,-73.262];
+    var c=st.addr?[st.addr.lat,st.addr.lon]:[45.307,-73.262],z=st.addr?(st.addr.z||20):13;
     if(!map){
-      map=L.map('map',{zoomControl:true,maxZoom:21,scrollWheelZoom:false}).setView(c,st.addr?20:13);
+      map=L.map('map',{zoomControl:true,maxZoom:21,scrollWheelZoom:false}).setView(c,z);
       sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:21,maxNativeZoom:19,attribution:'Imagerie © Esri'});
       plan=L.tileLayer('https://geoegl.msp.gouv.qc.ca/apis/carto/tms/1.0.0/orthos@EPSG_3857/{z}/{x}/{y}.jpeg',{tms:true,maxZoom:21,maxNativeZoom:20,attribution:'Photo aérienne © Gouvernement du Québec'}).addTo(map);
       plan.on('tileerror',function(){if(!fallback){fallback=true;vue(false);}});
       var hint=document.createElement('div');hint.className='tap';hint.id='tapHint';hint.hidden=true;$('#map').parentNode.appendChild(hint);
-      map.on('click',function(e){if(!st.addr){mapMsg('Entrez d’abord votre adresse, plus haut.');setTimeout(function(){mapMsg(st.addr?'':'Entrez votre adresse pour voir votre maison.');},1600);return;}placeMarker(st.mt,e.latlng);});
-    } else { map.setView(c,st.addr?20:13); }
+      map.on('click',function(e){if(!ready()){mapMsg('Entrez d’abord votre adresse, plus haut, ou choisissez « Trouver ma maison directement sur la carte ».');setTimeout(function(){mapMsg(ready()?'':'Entrez votre adresse pour voir votre maison.');},2200);return;}if(!st.addr&&map.getZoom()<17){mapMsg('Zoomez davantage sur votre maison avant de placer les points.');setTimeout(function(){mapMsg('');},1800);return;}placeMarker(st.mt,e.latlng);});
+    } else if(st.addr||!st.free){ map.setView(c,z); }
     if(st.addr){mapMsg('');if(home)map.removeLayer(home);home=L.circleMarker(c,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);}
-    else mapMsg('Entrez votre adresse pour voir votre maison.');
+    else mapMsg(st.free?'':'Entrez votre adresse pour voir votre maison.');
     renderTools();
     setTimeout(function(){map.invalidateSize();},60);
   }
@@ -357,18 +362,25 @@ footer b{color:#fff}
   // Adresse : autocomplétion (Photon / OpenStreetMap)
   var adr=$('#f-adr'),list=$('#adr-list'),tmr=null,lastQ='';
   function fmt(p){return [[p.housenumber,p.street||p.name].filter(Boolean).join(' '),p.city||p.town||p.village,(p.state==='Québec'||p.state==='Quebec')?'QC':p.state,p.postcode].filter(Boolean).join(', ');}
-  function choose(t,x){adr.value=t;st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||''};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').hidden=false;initMap();}
+  function choose(t,x,z){adr.value=t;st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||'',z:z||20};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=z?'✓ Secteur trouvé : zoomez sur votre maison, puis placez la borne':'✓ Adresse trouvée';$('#adr-ok').hidden=false;initMap();}
+  function goFree(){st.free=true;st.skip=false;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=adr.value.trim()?'✓ Adresse notée : trouvez maintenant votre maison sur la carte':'Trouvez votre maison sur la carte';$('#adr-ok').hidden=false;render();initMap();setTimeout(function(){$('#map').scrollIntoView({behavior:'smooth',block:'center'});},80);}
+  $('#freeMap').onclick=goFree;
+  $('#skipMap2').onclick=function(){if(!st.skip)$('#skipMap').click();};
+  var CP=/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
   adr.addEventListener('input',function(){
     st.addr=null;$('#adr-ok').hidden=true;var q=adr.value.trim();clearTimeout(tmr);
     if(q.length<4){list.hidden=true;adr.setAttribute('aria-expanded','false');return;}
     tmr=setTimeout(function(){lastQ=q;
       fetch('https://photon.komoot.io/api/?limit=6&lang=fr&lat=45.31&lon=-73.26&q='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
         if(q!==lastQ)return;
-        var f=(j.features||[]).filter(function(x){return x.properties.countrycode==='CA';}).slice(0,5);
+        var f=(j.features||[]).filter(function(x){return x.properties.countrycode==='CA';}).slice(0,5),cp=CP.test(q);
         list.innerHTML='';
         f.forEach(function(x){var li=document.createElement('li');li.setAttribute('role','option');li.tabIndex=-1;var t=fmt(x.properties);li.textContent=t;
           li.onmousedown=function(e){e.preventDefault();choose(t,x);};li.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();choose(t,x);adr.focus();}};list.appendChild(li);});
-        list.hidden=!f.length;adr.setAttribute('aria-expanded',f.length?'true':'false');
+        if(cp){var pc=q.toUpperCase().replace(/^(...) ?(...)$/,'$1 $2');var hit=f.filter(function(x){return (x.properties.postcode||'').toUpperCase().replace(/\s/g,'')===pc.replace(/\s/g,'');})[0]||f[0];
+          list.innerHTML='';if(hit){var li0=document.createElement('li');li0.setAttribute('role','option');li0.tabIndex=-1;li0.textContent='Code postal '+pc+' (secteur)';li0.onmousedown=function(e){e.preventDefault();choose('Code postal '+pc,hit,17);};list.appendChild(li0);}}
+        var la=document.createElement('li');la.className='alt';la.setAttribute('role','option');la.tabIndex=-1;la.textContent='Pas dans la liste? Garder ce que j’ai écrit et trouver ma maison sur la carte →';la.onmousedown=function(e){e.preventDefault();goFree();};la.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();goFree();}};list.appendChild(la);
+        list.hidden=false;adr.setAttribute('aria-expanded','true');
       }).catch(function(){list.hidden=true;});
     },300);
   });
@@ -382,7 +394,7 @@ footer b{color:#fff}
   // Navigation
   $('#toS2').onclick=function(){
     var e=$('#err1'),miss=[];
-    if(!st.addr&&!adr.value.trim())miss.push('votre adresse');
+    if(!st.addr&&!adr.value.trim()&&!(st.free&&markers.borne))miss.push('votre adresse (ou votre code postal)');
     if(!st.dist)miss.push(st.manual?'la distance':'la borne et le panneau sur la carte');
     ['lieu','amp','passage','achat'].forEach(function(k){if(!st.b[k])miss.push({lieu:'l’emplacement',amp:'l’ampérage',passage:'le passage du câble',achat:'si vous avez votre borne'}[k]);});
     if(miss.length){e.textContent='Il manque : '+miss.join(', ')+'.';e.hidden=false;return;}
@@ -403,7 +415,7 @@ footer b{color:#fff}
     var nom=$('#f-prenom').value.trim().replace(/\s+/g,' '),prenom=nom.split(' ')[0],tel=$('#f-tel').value.trim(),mail=$('#f-mail').value.trim();
     if(nom.length<3||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){e.textContent='Entrez votre nom complet et un courriel valide.';e.hidden=false;return;}
     if(!$('#f-consent').checked){e.textContent='Cochez la case pour qu’on puisse vous écrire.';e.hidden=false;return;}
-    var data={prenom:prenom,nom:nom,telephone:tel,courriel:mail,consent:'oui',adresse:st.addr?st.addr.label:adr.value.trim(),ville:st.addr?st.addr.ville:'',
+    var data={prenom:prenom,nom:nom,telephone:tel,courriel:mail,consent:'oui',adresse:(st.addr&&!st.addr.z)?st.addr.label:(adr.value.trim()||'Indiquée sur la carte (voir GPS)'),ville:st.addr?st.addr.ville:'',
       distance:st.dist,mesure:st.manual?'estimée par le client':'mesurée sur la carte',lieu:st.b.lieu,amp:st.b.amp,passage:st.b.passage,achat:st.b.achat,
       marque:$('#f-marque').value,modele:$('#f-modele').value.trim(),
       borneGPS:markers.borne?markers.borne.getLatLng().lat.toFixed(6)+','+markers.borne.getLatLng().lng.toFixed(6):'',
