@@ -33,7 +33,7 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1
 .steps{display:flex;gap:8px;flex-wrap:wrap}
 .step{padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600;color:#A6A6A6;border:1px solid #333}
 .step.on{background:var(--orange);color:var(--ink);border-color:var(--orange)}.step.done{background:#333;color:#fff}
-.step[data-s]{cursor:pointer}.step[data-s]:hover{border-color:var(--orange);color:#fff}
+.step[data-s]{cursor:pointer;font-family:inherit;background:transparent;-webkit-tap-highlight-color:rgba(250,137,13,.3);touch-action:manipulation}button.step.done{background:#333}.step[data-s]:hover{border-color:var(--orange);color:#fff}
 @media(max-width:640px){header .wrap{flex-wrap:wrap;row-gap:10px}.steps{width:100%;flex-wrap:nowrap;gap:6px}.step{flex:1 1 0;min-width:0;text-align:center;padding:6px 6px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 .hero{background:var(--ink);color:#fff}
 .hero .wrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px;align-items:center;padding-block:28px 40px}
@@ -217,7 +217,7 @@ footer b{color:#fff}
         </div>
       </div>
     </div>
-    <div class="bar"><span></span><button class="btn btn-dark" id="toS1b" type="button">Continuer → Quelques détails</button></div>
+    <div class="bar"><button class="btn btn-outline" id="skipS1" type="button">Passer cette étape →</button><button class="btn btn-dark" id="toS1b" type="button">Continuer → Quelques détails</button></div>
   </section>
 
   <!-- Étape 2 : détails -->
@@ -320,7 +320,7 @@ footer b{color:#fff}
   function render(){
     ['s1','s1b','s2','s3'].forEach(function(id,k){$('#'+id).hidden=st.step!==k+1;});
     $('#hero').hidden=st.step!==1;
-    $('#steps').innerHTML=['1 · Lieu','2 · Détails','3 · Courriel','4 · Estimation'].map(function(l,k){var n=k+1,c=st.step===n?'on':(st.step>n?'done':''),go=n!==st.step&&st.step!==4&&n<=3&&n<=st.max;return '<span class="step '+c+'"'+(go?' data-s="'+n+'" role="button" tabindex="0"':'')+'>'+l+'</span>';}).join('');
+    $('#steps').innerHTML=['1 · Lieu','2 · Détails','3 · Courriel','4 · Estimation'].map(function(l,k){var n=k+1,c=st.step===n?'on':(st.step>n?'done':''),go=n!==st.step&&st.step!==4&&n<=3;return go?'<button type="button" class="step '+c+'" data-s="'+n+'">'+l+'</button>':'<span class="step '+c+'">'+l+'</span>';}).join('');
     var uni=$('#f-unite');if(uni&&uni.value.trim()&&!st.b.bat)st.b.bat='multi';
     $('#bat-note').hidden=st.b.bat!=='multi';
     $$('[data-q]').forEach(function(el){var k=el.getAttribute('data-q');el.innerHTML='';
@@ -458,6 +458,7 @@ footer b{color:#fff}
   $('#steps').addEventListener('click',function(e){var t=e.target.closest('[data-s]');if(t)goStep(Number(t.getAttribute('data-s')));});
   $('#steps').addEventListener('keydown',function(e){var t=e.target.closest('[data-s]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();goStep(Number(t.getAttribute('data-s')));}});
   $('#toS1b').onclick=function(){goStep(2);};
+  $('#skipS1').onclick=function(){goStep(2);};
   $('#back0').onclick=function(){goStep(1);};
   $('#toS2').onclick=function(){
     // Rien n'est obligatoire à cette étape : ce qui manque sera confirmé avec le client.
