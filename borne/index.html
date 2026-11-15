@@ -217,9 +217,10 @@ footer b{color:#fff}
     <p class="sub">On vous l'envoie par courriel en quelques secondes.</p>
     <form id="form" class="card" novalidate style="max-width:720px">
       <div class="grid2">
-        <div class="fld"><label for="f-prenom">Prénom *</label><input id="f-prenom" autocomplete="given-name"></div>
+        <div class="fld"><label for="f-prenom">Nom complet *</label><input id="f-prenom" autocomplete="name"></div>
         <div class="fld"><label for="f-mail">Courriel *</label><input id="f-mail" type="email" autocomplete="email"></div>
       </div>
+      <div class="fld" style="margin-top:14px;max-width:340px"><label for="f-tel">Téléphone <span style="font-weight:400;color:var(--mute)">(facultatif, mais recommandé)</span></label><input id="f-tel" type="tel" autocomplete="tel" placeholder="450 555-1234"></div>
       <div class="ph-box">
         <b>📷 Joignez des photos (facultatif, mais ça change tout)</b>
         <ul><li>Votre panneau électrique, porte ouverte (on doit voir les disjoncteurs)</li><li>L’étiquette du panneau (marque et ampérage)</li><li>L’endroit où vous voulez la borne</li><li>Le chemin du câble entre le panneau et la borne (sous-sol, garage, mur extérieur)</li></ul>
@@ -253,7 +254,7 @@ footer b{color:#fff}
       <p class="sub" style="margin:0">Nous venons de l'envoyer à <b id="done-mail"></b>. Vérifiez aussi vos courriels indésirables.</p>
       <div class="card" style="text-align:left;width:100%">
         <b>Pour une soumission détaillée ou une visite</b>
-        <p class="note" style="margin:6px 0 0">Répondez simplement à notre courriel avec des photos de votre panneau électrique (porte ouverte) et de l'emplacement souhaité, votre nom complet et votre numéro de téléphone.</p>
+        <p class="note" style="margin:6px 0 0">Répondez simplement à notre courriel avec des photos de votre panneau électrique (porte ouverte) et de l'emplacement souhaité.</p>
       </div>
     </div>
   </section>
@@ -397,10 +398,10 @@ footer b{color:#fff}
     ev.preventDefault();
     var e=$('#err2');e.hidden=true;
     if($('#f-site').value)return;
-    var prenom=$('#f-prenom').value.trim(),mail=$('#f-mail').value.trim();
-    if(!prenom||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){e.textContent='Entrez votre prénom et un courriel valide.';e.hidden=false;return;}
+    var nom=$('#f-prenom').value.trim().replace(/\s+/g,' '),prenom=nom.split(' ')[0],tel=$('#f-tel').value.trim(),mail=$('#f-mail').value.trim();
+    if(nom.length<3||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){e.textContent='Entrez votre nom complet et un courriel valide.';e.hidden=false;return;}
     if(!$('#f-consent').checked){e.textContent='Cochez la case pour qu’on puisse vous écrire.';e.hidden=false;return;}
-    var data={prenom:prenom,courriel:mail,consent:'oui',adresse:st.addr?st.addr.label:adr.value.trim(),ville:st.addr?st.addr.ville:'',
+    var data={prenom:prenom,nom:nom,telephone:tel,courriel:mail,consent:'oui',adresse:st.addr?st.addr.label:adr.value.trim(),ville:st.addr?st.addr.ville:'',
       distance:st.dist,mesure:st.manual?'estimée par le client':'mesurée sur la carte',lieu:st.b.lieu,amp:st.b.amp,passage:st.b.passage,achat:st.b.achat,
       marque:$('#f-marque').value,modele:$('#f-modele').value.trim(),
       borneGPS:markers.borne?markers.borne.getLatLng().lat.toFixed(6)+','+markers.borne.getLatLng().lng.toFixed(6):'',
@@ -411,7 +412,7 @@ footer b{color:#fff}
     fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)})
       .then(function(r){return r.json();})
       .then(function(j){
-        if(j&&j.ok){$('#done-mail').textContent=mail;if(photos.length){var dn=$('#s3 .card .note');if(dn)dn.textContent='Merci pour vos '+photos.length+' photo(s), on les a reçues. Pour une soumission détaillée ou une visite, répondez simplement à notre courriel avec votre nom complet et votre numéro de téléphone.';}st.step=3;render();window.scrollTo(0,0);return;}
+        if(j&&j.ok){$('#done-mail').textContent=mail;if(photos.length){var dn=$('#s3 .card .note');if(dn)dn.textContent='Merci pour vos '+photos.length+' photo(s), on les a reçues. Pour une soumission détaillée ou une visite, répondez simplement à notre courriel.';}st.step=3;render();window.scrollTo(0,0);return;}
         e.textContent=j&&j.err==='limite'?'Vous avez déjà demandé plusieurs estimations aujourd’hui. Réessayez demain ou répondez à notre courriel précédent.':'L’envoi n’a pas fonctionné. Vérifiez votre courriel et réessayez.';
         e.hidden=false;b.disabled=false;b.textContent='Recevoir mon estimation par courriel';
       })
