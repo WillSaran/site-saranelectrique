@@ -70,7 +70,7 @@ main .wrap{padding-block:36px 64px}
 .tool.placed .num{background:#1d7a46}
 .mapbar{position:absolute;right:10px;top:10px;z-index:450;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0}
 .mb{background:#fff;color:var(--ink);border:1.5px solid var(--ink);padding:8px 12px;font:600 14px Inter,sans-serif;cursor:pointer}
-.mb:first-child{border-radius:999px 0 0 999px}.mb:nth-child(2){border-radius:0 999px 999px 0;border-left:0}
+#vuePlan{border-radius:999px 0 0 999px}#vueSat{border-radius:0 999px 999px 0;border-left:0}
 #reset{border-radius:999px}
 .mb.on{background:var(--ink);color:#fff}
 .alt{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
@@ -156,11 +156,11 @@ footer b{color:#fff}
           <div id="map"></div>
           <div id="map-msg"></div>
           <div class="mapbar">
-            <button type="button" id="vueSat" class="mb on">Satellite</button><button type="button" id="vuePlan" class="mb">Plan</button>
+            <button type="button" id="vuePlan" class="mb on">Sans feuilles</button><button type="button" id="vueSat" class="mb">Satellite (été)</button>
             <button type="button" id="reset" class="mb" style="margin-left:8px">↺ Recommencer</button>
           </div>
         </div>
-        <p class="note" style="margin:0">Des arbres cachent votre maison? Essayez la vue <b>Plan</b>, ou zoomez avec <b>+</b> et <b>−</b>. Vous pouvez glisser les points pour les ajuster.</p>
+        <p class="note" style="margin:0">La photo <b>Sans feuilles</b> est prise au printemps, avant que les arbres cachent les maisons. Vous pouvez aussi essayer <b>Satellite (été)</b> ou zoomer avec <b>+</b> et <b>−</b>. Vous pouvez glisser les points pour les ajuster.</p>
         <div class="alt">
           <span>Vous ne voyez pas bien votre maison?</span>
           <button type="button" class="btn btn-outline" id="noMap">Choisir la distance moi-même</button>
@@ -296,18 +296,19 @@ footer b{color:#fff}
     if(!window.L){mapMsg('La carte n’a pas pu se charger. Indiquez la distance vous-même, sous la carte.');st.manual=true;render();return;}
     var c=st.addr?[st.addr.lat,st.addr.lon]:[45.307,-73.262];
     if(!map){
-      map=L.map('map',{zoomControl:true,maxZoom:21,scrollWheelZoom:false}).setView(c,st.addr?19:13);
-      sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:21,maxNativeZoom:19,attribution:'Imagerie © Esri'}).addTo(map);
-      plan=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:21,maxNativeZoom:19,attribution:'© OpenStreetMap'});
+      map=L.map('map',{zoomControl:true,maxZoom:21,scrollWheelZoom:false}).setView(c,st.addr?20:13);
+      sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:21,maxNativeZoom:19,attribution:'Imagerie © Esri'});
+      plan=L.tileLayer('https://geoegl.msp.gouv.qc.ca/apis/carto/tms/1.0.0/orthos@EPSG_3857/{z}/{x}/{y}.jpeg',{tms:true,maxZoom:21,maxNativeZoom:20,attribution:'Photo aérienne © Gouvernement du Québec'}).addTo(map);
+      plan.on('tileerror',function(){if(!fallback){fallback=true;vue(false);}});
       var hint=document.createElement('div');hint.className='tap';hint.id='tapHint';hint.hidden=true;$('#map').parentNode.appendChild(hint);
       map.on('click',function(e){if(!st.addr){mapMsg('Entrez d’abord votre adresse, plus haut.');setTimeout(function(){mapMsg(st.addr?'':'Entrez votre adresse pour voir votre maison.');},1600);return;}placeMarker(st.mt,e.latlng);});
-    } else { map.setView(c,st.addr?19:13); }
+    } else { map.setView(c,st.addr?20:13); }
     if(st.addr){mapMsg('');if(home)map.removeLayer(home);home=L.circleMarker(c,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);}
     else mapMsg('Entrez votre adresse pour voir votre maison.');
     renderTools();
     setTimeout(function(){map.invalidateSize();},60);
   }
-  var sat=null,plan=null;
+  var sat=null,plan=null,fallback=false;
   function vue(p){if(!map)return;if(p){map.removeLayer(sat);plan.addTo(map);}else{map.removeLayer(plan);sat.addTo(map);}$('#vuePlan').className='mb'+(p?' on':'');$('#vueSat').className='mb'+(p?'':' on');}
   $('#vueSat').onclick=function(){vue(false);};
   $('#vuePlan').onclick=function(){vue(true);};
