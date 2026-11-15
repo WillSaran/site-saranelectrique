@@ -129,7 +129,7 @@
     if(!st.bat){$('#s1title').textContent='Quel type de projet ?';$('#s1sub').textContent='Choisissez votre secteur.';
       SECT.forEach(function(it){cd.appendChild(card(it,'big',function(){st.bat=it[0];st.projet=null;render();window.scrollTo(0,0);}));});}
     else{$('#s1title').textContent=st.bat==='commercial'?'Votre projet commercial':'Votre projet résidentiel';$('#s1sub').textContent='Touchez une carte pour voir le détail, puis choisissez.';
-      PROJ[st.bat].forEach(function(it){cd.appendChild(card(it,'',function(){st.projet=it[0];st.step=2;render();window.scrollTo(0,0);}));});}
+      PROJ[st.bat].forEach(function(it){cd.appendChild(card(it,'',function(){if(it[0]==='borne'){location.href='/borne/';return;}st.projet=it[0];st.step=2;render();window.scrollTo(0,0);}));});}
     // Étape 2
     pills($('#delais'),delais,function(){return st.delai;},function(v){st.delai=v;});
     $('#photo-tips').innerHTML=(TIPS[st.projet]||TIPS._).map(function(t){return '<li>'+esc(t)+'</li>';}).join('');
@@ -208,7 +208,7 @@
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#nophoto').hidden)$('#nophoto').hidden=true;});
   $('#restart').onclick=function(){st.step=1;st.bat=null;st.projet=null;render();};
   $('#backSect').onclick=function(){st.bat=null;st.projet=null;render();};
-  window.__preselect=function(code){var p=code.split('-');var sec=p.shift(),pj=p.join('-');if(!PROJ[sec])return;st.bat=sec;st.projet=null;st.step=1;
+  window.__preselect=function(code){var p=code.split('-');var sec=p.shift(),pj=p.join('-');if(sec==='residentiel'&&pj==='borne'){location.replace('/borne/');return;}if(!PROJ[sec])return;st.bat=sec;st.projet=null;st.step=1;
     if(pj&&PROJ[sec].some(function(x){return x[0]===pj;})){st.projet=pj;st.step=2;}render();window.scrollTo(0,0);$$('.dd-1').forEach(function(d){d.blur&&d.blur();});document.activeElement&&document.activeElement.blur();};
   var h0=location.hash.slice(1);if(h0)window.__preselect(h0);
   window.addEventListener('hashchange',function(){var h=location.hash.slice(1);if(h)window.__preselect(h);});
