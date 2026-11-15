@@ -62,6 +62,15 @@ main .wrap{padding-block:36px 64px}
 .tool.on{background:var(--soft);border-color:var(--ink)}
 .pin{width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;border:2px solid #fff}
 .pin-b{background:#995000}.pin-p{background:var(--ink)}
+.sw{width:14px;height:14px;border-radius:999px;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--ink);flex:none}
+.sw-b{background:#22a35a}.sw-p{background:#FA890D}
+.mk{position:relative;width:0;height:0}
+.mk .dot{position:absolute;left:-8px;top:-8px;width:16px;height:16px;border-radius:999px;border:2.5px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.6);cursor:grab}
+.mk-b .dot{background:#22a35a}.mk-p .dot{background:#FA890D}
+.mk svg{position:absolute;overflow:visible;pointer-events:none}
+.mk .lbl{position:absolute;white-space:nowrap;background:rgba(20,20,20,.9);color:#fff;font:700 13px Inter,sans-serif;padding:5px 10px;border-radius:999px;border:1.5px solid #fff;pointer-events:none}
+.mk-b svg{left:0;top:-46px}.mk-b .lbl{left:40px;top:-62px}
+.mk-p svg{left:-46px;top:0}.mk-p .lbl{right:40px;top:40px}
 #map{height:440px;border-radius:14px;overflow:hidden;background:#222;border:3px solid var(--ink)}
 @media(max-width:560px){#map{height:360px}}
 #map-msg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff;background:rgba(20,20,20,.85);border-radius:14px;z-index:500}
@@ -147,11 +156,11 @@ footer b{color:#fff}
 <section class="hero pad" id="hero"><div class="wrap">
   <div>
     <h1>Combien coûte l'installation de <span>votre borne</span>&nbsp;?</h1>
-    <p>Montrez-nous sur la vue satellite de votre maison où vous voulez la borne et où se trouve votre panneau électrique. On calcule la longueur de câble et on vous envoie votre estimation par courriel.</p>
+    <p>Montrez-nous sur la photo aérienne de votre maison ou de votre commerce où vous voulez la borne et où se trouve votre panneau électrique. On calcule la longueur de câble et on vous envoie votre estimation par courriel.</p>
     <ol>
       <li>Entrez votre adresse et placez la borne et le panneau.</li>
       <li>Répondez à quelques questions.</li>
-      <li>Recevez votre estimation par courriel, en quelques secondes.</li>
+      <li>Recevez votre estimation par courriel (résidentiel) ou une proposition de visite (commercial).</li>
     </ol>
   </div>
   <img src="borne-saran.jpg" alt="Borne de recharge installée sur le mur d'un garage, voiture électrique branchée au crépuscule">
@@ -161,18 +170,18 @@ footer b{color:#fff}
 
   <!-- Étape 1 : la maison -->
   <section id="s1">
-    <h2 class="t">Votre maison</h2>
-    <p class="sub">Commencez par l'adresse où sera installée la borne.</p>
+    <h2 class="t">L'endroit des travaux</h2>
+    <p class="sub">Commencez par l'adresse où sera installée la borne. Une information vous manque? Passez à la suivante : on la confirmera avec vous.</p>
     <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;max-width:820px">
     <div class="fld" style="position:relative;flex:1 1 420px;min-width:0">
-      <label for="f-adr">Adresse des travaux *</label>
-      <input id="f-adr" autocomplete="off" placeholder="Commencez à taper l'adresse…" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="adr-list">
+      <label for="f-adr">Adresse des travaux</label>
+      <input id="f-adr" autocomplete="off" placeholder="ex. 1424 1re Rue, Saint-Paul-de-l'Île-aux-Noix" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="adr-list">
       <ul id="adr-list" role="listbox" hidden></ul>
       <span id="adr-ok" class="adr-ok" hidden>✓ Adresse trouvée</span>
     </div>
     <div class="fld" style="flex:0 1 150px"><label for="f-unite">App. / unité</label><input id="f-unite" autocomplete="address-line2" placeholder="ex. 204"></div>
     </div>
-    <div style="margin-top:14px"><p class="q" style="margin-bottom:8px">Type de bâtiment</p><div class="pills" data-q="bat"></div>
+    <div style="margin-top:14px"><p class="q" style="margin-bottom:8px">Type de bâtiment <span style="font-weight:400;color:var(--mute)">(facultatif)</span></p><div class="pills" data-q="bat"></div>
       <p class="note" id="bat-note" hidden style="margin:10px 0 0;max-width:720px;background:#FFF4E6;border:1px solid #FA890D;border-radius:10px;padding:10px 12px;color:#4D4D4D">En condo, en appartement ou en plex, l’installation est souvent plus complexe : panneau et stationnement parfois éloignés, accord du syndicat ou du propriétaire, et possiblement un <b>contrôleur de charge</b> si la capacité électrique est limitée. On vous donne une estimation de départ, puis on évalue les travaux avec vous.</p></div>
     <p class="adr-alt">Vous pouvez aussi écrire seulement votre <b>code postal</b>. Adresse introuvable? <button type="button" id="freeMap">Trouver ma maison directement sur la carte</button> ou <button type="button" id="skipMap2">donner une distance approximative</button>.</p>
 
@@ -180,8 +189,8 @@ footer b{color:#fff}
       <div class="left">
         <div class="guide" id="guide" aria-live="polite"></div>
         <div class="pills" id="mapTools">
-          <button type="button" class="tool on" data-mt="borne"><span class="num">1</span><span class="pin pin-b">VE</span>Où sera la borne</button>
-          <button type="button" class="tool" data-mt="panneau"><span class="num">2</span><span class="pin pin-p">P</span>Où est le panneau</button>
+          <button type="button" class="tool on" data-mt="borne"><span class="num">1</span><span class="sw sw-b"></span>Où sera la borne</button>
+          <button type="button" class="tool" data-mt="panneau"><span class="num">2</span><span class="sw sw-p"></span>Où est le panneau</button>
           <button type="button" class="tool" id="skipMap">Passer cette étape →</button>
         </div>
         <div id="mapBlock">
@@ -223,8 +232,8 @@ footer b{color:#fff}
 
   <!-- Étape 2 : courriel -->
   <section id="s2" hidden>
-    <h2 class="t">Où envoyer votre estimation ?</h2>
-    <p class="sub">On vous l'envoie par courriel en quelques secondes.</p>
+    <h2 class="t" id="s2t">Où envoyer votre estimation ?</h2>
+    <p class="sub" id="s2s">On vous l'envoie par courriel en quelques secondes.</p>
     <form id="form" class="card" novalidate style="max-width:720px">
       <div class="grid2">
         <div class="fld"><label for="f-prenom">Nom complet *</label><input id="f-prenom" autocomplete="name"></div>
@@ -244,7 +253,7 @@ footer b{color:#fff}
       <p class="err" id="err2" hidden></p>
       <div class="bar"><button class="btn btn-outline" id="back1" type="button">← Retour</button><button class="btn btn-orange" id="send" type="submit">Recevoir mon estimation par courriel</button></div>
     </form>
-    <div class="subsidy" style="max-width:720px">
+    <div class="subsidy" id="subsidy" style="max-width:720px">
       <b>Aide financière Écorecharge : jusqu'à 600 $</b> du gouvernement du Québec pour l'achat d'une borne de recharge à domicile admissible.
       <ul>
         <li>L'aide porte uniquement sur le prix de la borne, avant taxes. Les frais d'installation ne sont pas admissibles.</li>
@@ -260,10 +269,10 @@ footer b{color:#fff}
   <section id="s3" hidden>
     <div class="done">
       <div class="ico" aria-hidden="true">✉️</div>
-      <h2 class="t">Votre estimation est en route</h2>
-      <p class="sub" style="margin:0">Nous venons de l'envoyer à <b id="done-mail"></b>. Vérifiez aussi vos courriels indésirables.</p>
+      <h2 class="t" id="s3t">Votre estimation est en route</h2>
+      <p class="sub" style="margin:0"><span id="s3s">Nous venons de l'envoyer à</span> <b id="done-mail"></b>. Vérifiez aussi vos courriels indésirables.</p>
       <div class="card" style="text-align:left;width:100%">
-        <b>Pour une soumission détaillée ou une visite</b>
+        <b id="s3c">Pour une soumission détaillée ou une visite</b>
         <p class="note" style="margin:6px 0 0">Répondez simplement à notre courriel avec des photos de votre panneau électrique (porte ouverte) et de l'emplacement souhaité.</p>
       </div>
     </div>
@@ -292,7 +301,7 @@ footer b{color:#fff}
     amp:[['200','200 A'],['100','100 A'],['autre','Autre'],['nsp','Je ne sais pas']],
     passage:[['ssnf','Sous-sol non fini'],['ext','Par l’extérieur'],['fini','Murs finis'],['sol','Sous terre ou béton'],['nsp','Je ne sais pas']],
     achat:[['oui','Oui, je l’ai'],['non','Non, fournissez-la-moi']],
-    bat:[['maison','Maison'],['multi','Condo / appartement / plex']],
+    bat:[['maison','Maison'],['multi','Condo / appartement / plex'],['commerce','Commerce']],
     distm:[['10','Moins de 15 pi'],['25','15 à 30 pi'],['40','30 à 50 pi'],['60','Plus de 50 pi']]};
   var st={step:1,addr:null,dist:null,manual:false,mt:'borne',b:{bat:null,lieu:null,amp:null,passage:null,achat:null,distm:null}};
 
@@ -304,19 +313,30 @@ footer b{color:#fff}
     $('#bat-note').hidden=st.b.bat!=='multi';
     $$('[data-q]').forEach(function(el){var k=el.getAttribute('data-q');el.innerHTML='';
       Q[k].forEach(function(o){var b=document.createElement('button');b.type='button';b.className='pill'+(st.b[k]===o[0]?' on':'');b.textContent=o[1];b.setAttribute('aria-pressed',st.b[k]===o[0]);
-        b.onclick=function(){st.b[k]=o[0];if(k==='distm'){st.dist=Number(o[0]);showDist();}render();};el.appendChild(b);});});
+        b.onclick=function(){st.b[k]=(k==='bat'&&st.b.bat===o[0])?null:o[0];if(k==='distm'){st.dist=Number(o[0]);showDist();}render();};el.appendChild(b);});});
     $('#modele-wrap').hidden=st.b.achat!=='oui';
     $('#manual').hidden=!st.manual;
     $('#mapBlock').hidden=!!st.skip;
     $$('#mapTools [data-mt]').forEach(function(b){b.hidden=!!st.skip;});
     $('#skipMap').textContent=st.skip?'← Revenir à la carte':'Passer cette étape →';
+    var com=st.b.bat==='commerce';
+    $('#s2t').textContent=com?'Où vous écrire ?':'Où envoyer votre estimation ?';
+    $('#s2s').textContent=com?'Pour un commerce, on évalue sur place : on vous écrit pour planifier une visite.':'On vous l’envoie par courriel en quelques secondes.';
+    if(!$('#send').disabled)$('#send').textContent=com?'Envoyer ma demande':'Recevoir mon estimation par courriel';
+    $('#toS2').textContent=com?'Continuer →':'Continuer → Recevoir mon estimation';
+    $('#subsidy').hidden=com;
+    $('#s3t').textContent=com?'Demande reçue':'Votre estimation est en route';
+    $('#s3s').textContent=com?'Nous vous avons écrit à':'Nous venons de l’envoyer à';
+    $('#s3c').textContent=com?'Pour planifier la visite':'Pour une soumission détaillée ou une visite';
   }
   function showDist(){$('#dist').textContent=st.dist?('≈ '+st.dist+' pi'+(st.manual?'':' ('+Math.round(st.dist/3.281)+' m)')):(markers.borne?'Placez le panneau':'Placez la borne');}
 
   // Carte (Leaflet + imagerie satellite Esri)
   var map=null,markers={borne:null,panneau:null},line=null,home=null;
   function mapMsg(t){var m=$('#map-msg');m.textContent=t||'';m.style.display=t?'flex':'none';}
-  function pinIcon(kind){return L.divIcon({className:'',html:'<span class="pin '+(kind==='borne'?'pin-b':'pin-p')+'" style="width:34px;height:34px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.5)">'+(kind==='borne'?'VE':'P')+'</span>',iconSize:[34,34],iconAnchor:[17,17]});}
+  function pinIcon(kind){var B=kind==='borne';
+    var svg=B?'<svg width="44" height="46"><line x1="0" y1="46" x2="40" y2="6" stroke="#fff" stroke-width="2.5"/></svg>':'<svg width="46" height="44"><line x1="46" y1="0" x2="6" y2="40" stroke="#fff" stroke-width="2.5"/></svg>';
+    return L.divIcon({className:'',html:'<div class="mk '+(B?'mk-b':'mk-p')+'">'+svg+'<span class="lbl">'+(B?'Borne de recharge':'Panneau électrique')+'</span><i class="dot"></i></div>',iconSize:[0,0],iconAnchor:[0,0]});}
   function updDist(){
     if(line){map.removeLayer(line);line=null;}
     if(markers.borne&&markers.panneau){var P=markers.panneau.getLatLng(),B=markers.borne.getLatLng(),K=L.latLng(P.lat,B.lng);
@@ -367,7 +387,13 @@ footer b{color:#fff}
   $('#skipMap').onclick=function(){st.skip=!st.skip;st.manual=st.skip?true:st.manual;render();renderTools();
     if(st.skip){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});}else if(map){setTimeout(function(){map.invalidateSize();},50);}};
 
-  // Adresse : autocomplétion (Photon / OpenStreetMap)
+  // Adresse : Adresses Québec (gouvernement : numéros civiques et codes postaux exacts), Photon en secours
+  function aq(q){return fetch('https://geoegl.msp.gouv.qc.ca/apis/icherche/geocode?type=adresses&geometry=true&limit=5&q='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
+    var f=(j.features||[]).filter(function(x){return x.geometry&&x.geometry.coordinates;}).map(function(x){var n=x.properties.nom||'',m=n.match(/^(.*),\s*(.*?)\s+([A-Z]\d[A-Z])\s?(\d[A-Z]\d)$/);
+      return {geometry:{coordinates:x.geometry.coordinates},properties:{countrycode:'CA',street:m?m[1]:n.split(',')[0],city:m?m[2]:(n.split(',')[1]||'').trim(),state:'Québec',postcode:m?m[3]+' '+m[4]:''}};});
+    if(!f.length)throw 0;return {features:f};});}
+  function photon(q){return fetch('https://photon.komoot.io/api/?limit=6&lang=fr&lat=45.31&lon=-73.26&q='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
+    (j.features||[]).forEach(function(x){delete x.properties.postcode;});return j;});}
   var adr=$('#f-adr'),list=$('#adr-list'),tmr=null,lastQ='';
   function fmt(p){return [[p.housenumber,p.street||p.name].filter(Boolean).join(' '),p.city||p.town||p.village,(p.state==='Québec'||p.state==='Quebec')?'QC':p.state,p.postcode].filter(Boolean).join(', ');}
   function choose(t,x,z){adr.value=t;st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||'',z:z||20};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=z?'✓ Secteur trouvé : zoomez sur votre maison, puis placez la borne':'✓ Adresse trouvée';$('#adr-ok').hidden=false;initMap();}
@@ -379,7 +405,7 @@ footer b{color:#fff}
     st.addr=null;$('#adr-ok').hidden=true;var q=adr.value.trim();clearTimeout(tmr);
     if(q.length<4){list.hidden=true;adr.setAttribute('aria-expanded','false');return;}
     tmr=setTimeout(function(){lastQ=q;
-      fetch('https://photon.komoot.io/api/?limit=6&lang=fr&lat=45.31&lon=-73.26&q='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
+      (CP.test(q)?fetch('https://photon.komoot.io/api/?limit=6&lang=fr&lat=45.31&lon=-73.26&q='+encodeURIComponent(q)).then(function(r){return r.json();}):aq(q).catch(function(){return photon(q);})).then(function(j){
         if(q!==lastQ)return;
         var f=(j.features||[]).filter(function(x){return x.properties.countrycode==='CA';}).slice(0,5),cp=CP.test(q);
         list.innerHTML='';
@@ -393,7 +419,7 @@ footer b{color:#fff}
     },300);
   });
   adr.addEventListener('blur',function(){setTimeout(function(){list.hidden=true;},150);});
-  adr.addEventListener('keydown',function(e){var items=$$('li',list);if(list.hidden||!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();items[0].focus();}});
+  adr.addEventListener('keydown',function(e){var items=$$('li',list);if(e.key==='Enter'&&!st.addr&&items.length&&!list.hidden){e.preventDefault();items[0].onmousedown({preventDefault:function(){}});return;}if(list.hidden||!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();items[0].focus();}});
   list.addEventListener('keydown',function(e){var items=$$('li',list),i=items.indexOf(document.activeElement);
     if(e.key==='ArrowDown'){e.preventDefault();(items[i+1]||items[0]).focus();}
     else if(e.key==='ArrowUp'){e.preventDefault();(items[i-1]||adr).focus();}
@@ -403,12 +429,8 @@ footer b{color:#fff}
 
   // Navigation
   $('#toS2').onclick=function(){
-    var e=$('#err1'),miss=[];
-    if(!st.addr&&!adr.value.trim()&&!(st.free&&markers.borne))miss.push('votre adresse (ou votre code postal)');
-    if(!st.dist)miss.push(st.manual?'la distance':'la borne et le panneau sur la carte');
-    ['bat','lieu','amp','passage','achat'].forEach(function(k){if(!st.b[k])miss.push({bat:'le type de bâtiment',lieu:'l’emplacement',amp:'l’ampérage',passage:'le passage du câble',achat:'si vous avez votre borne'}[k]);});
-    if(miss.length){e.textContent='Il manque : '+miss.join(', ')+'.';e.hidden=false;return;}
-    e.hidden=true;st.step=2;render();window.scrollTo(0,0);setTimeout(function(){$('#f-prenom').focus();},50);
+    // Rien n'est obligatoire à cette étape : ce qui manque sera confirmé avec le client.
+    $('#err1').hidden=true;st.step=2;render();window.scrollTo(0,0);setTimeout(function(){$('#f-prenom').focus();},50);
   };
   $('#back1').onclick=function(){st.step=1;render();window.scrollTo(0,0);setTimeout(function(){if(map)map.invalidateSize();},60);};
 
@@ -426,7 +448,7 @@ footer b{color:#fff}
     if(nom.length<3||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){e.textContent='Entrez votre nom complet et un courriel valide.';e.hidden=false;return;}
     if(!$('#f-consent').checked){e.textContent='Cochez la case pour qu’on puisse vous écrire.';e.hidden=false;return;}
     var data={prenom:prenom,nom:nom,telephone:tel,courriel:mail,consent:'oui',adresse:((st.addr&&!st.addr.z)?st.addr.label:(adr.value.trim()||'Indiquée sur la carte (voir GPS)'))+($('#f-unite').value.trim()?', app. '+$('#f-unite').value.trim():''),unite:$('#f-unite').value.trim(),bat:st.b.bat,ville:st.addr?st.addr.ville:'',
-      distance:st.dist,mesure:st.manual?'estimée par le client':'mesurée sur la carte',lieu:st.b.lieu,amp:st.b.amp,passage:st.b.passage,achat:st.b.achat,
+      distance:st.dist||'',mesure:!st.dist?'non indiquée':(st.manual?'estimée par le client':'mesurée sur la carte'),lieu:st.b.lieu,amp:st.b.amp,passage:st.b.passage,achat:st.b.achat,
       marque:$('#f-marque').value,modele:$('#f-modele').value.trim(),
       borneGPS:markers.borne?markers.borne.getLatLng().lat.toFixed(6)+','+markers.borne.getLatLng().lng.toFixed(6):'',
       panneauGPS:markers.panneau?markers.panneau.getLatLng().lat.toFixed(6)+','+markers.panneau.getLatLng().lng.toFixed(6):'',
@@ -436,11 +458,11 @@ footer b{color:#fff}
     fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)})
       .then(function(r){return r.json();})
       .then(function(j){
-        if(j&&j.ok){$('#done-mail').textContent=mail;if(photos.length){var dn=$('#s3 .card .note');if(dn)dn.textContent='Merci pour vos '+photos.length+' photo(s), on les a reçues. Pour une soumission détaillée ou une visite, répondez simplement à notre courriel.';}st.step=3;render();window.scrollTo(0,0);return;}
+        if(j&&j.ok){b.disabled=false;$('#done-mail').textContent=mail;if(photos.length){var dn=$('#s3 .card .note');if(dn)dn.textContent='Merci pour vos '+photos.length+' photo(s), on les a reçues. Pour une soumission détaillée ou une visite, répondez simplement à notre courriel.';}st.step=3;render();window.scrollTo(0,0);return;}
         e.textContent=j&&j.err==='limite'?'Vous avez déjà demandé plusieurs estimations aujourd’hui. Réessayez demain ou répondez à notre courriel précédent.':'L’envoi n’a pas fonctionné. Vérifiez votre courriel et réessayez.';
-        e.hidden=false;b.disabled=false;b.textContent='Recevoir mon estimation par courriel';
+        e.hidden=false;b.disabled=false;render();
       })
-      .catch(function(){e.textContent='L’envoi n’a pas fonctionné. Vérifiez votre connexion et réessayez.';e.hidden=false;b.disabled=false;b.textContent='Recevoir mon estimation par courriel';});
+      .catch(function(){e.textContent='L’envoi n’a pas fonctionné. Vérifiez votre connexion et réessayez.';e.hidden=false;b.disabled=false;render();});
   });
 
   render();renderTools();initMap();
