@@ -151,7 +151,9 @@ footer b{color:#fff}
         <div class="pills" id="mapTools">
           <button type="button" class="tool on" data-mt="borne"><span class="num">1</span><span class="pin pin-b">VE</span>Où sera la borne</button>
           <button type="button" class="tool" data-mt="panneau"><span class="num">2</span><span class="pin pin-p">P</span>Où est le panneau</button>
+          <button type="button" class="tool" id="skipMap">Passer cette étape →</button>
         </div>
+        <div id="mapBlock">
         <div style="position:relative">
           <div id="map"></div>
           <div id="map-msg"></div>
@@ -160,10 +162,7 @@ footer b{color:#fff}
             <button type="button" id="reset" class="mb" style="margin-left:8px">↺ Recommencer</button>
           </div>
         </div>
-        <p class="note" style="margin:0">La photo satellite est prise au printemps, avant que les arbres cachent les maisons. Vous pouvez zoomer avec <b>+</b> et <b>−</b>. Vous pouvez glisser les points pour les ajuster.</p>
-        <div class="alt">
-          <span>Vous ne voyez pas bien votre maison?</span>
-          <button type="button" class="btn btn-outline" id="noMap">Choisir la distance moi-même</button>
+        <p class="note" style="margin:0">Vous pouvez zoomer avec <b>+</b> et <b>−</b>.</p>
         </div>
         <div id="manual" hidden>
           <p class="q">Distance approximative entre le panneau et la borne, en suivant les murs</p>
@@ -260,6 +259,9 @@ footer b{color:#fff}
         b.onclick=function(){st.b[k]=o[0];if(k==='distm'){st.dist=Number(o[0]);showDist();}render();};el.appendChild(b);});});
     $('#modele-wrap').hidden=st.b.achat!=='oui';
     $('#manual').hidden=!st.manual;
+    $('#mapBlock').hidden=!!st.skip;
+    $$('#mapTools [data-mt]').forEach(function(b){b.hidden=!!st.skip;});
+    $('#skipMap').textContent=st.skip?'← Revenir à la carte':'Passer cette étape →';
   }
   function showDist(){$('#dist').textContent=st.dist?('≈ '+st.dist+' pi'+(st.manual?'':' ('+Math.round(st.dist/3.281)+' m)')):(markers.borne?'Placez le panneau':'Placez la borne');}
 
@@ -312,7 +314,8 @@ footer b{color:#fff}
   function vue(p){if(!map)return;if(p){map.removeLayer(sat);plan.addTo(map);}else{map.removeLayer(plan);sat.addTo(map);}}
   $('#reset').onclick=function(){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}
     if(!st.manual)st.dist=null;st.mt='borne';showDist();renderTools();};
-  $('#noMap').onclick=function(){st.manual=true;render();renderTools();$('#manual').scrollIntoView({behavior:'smooth',block:'center'});};
+  $('#skipMap').onclick=function(){st.skip=!st.skip;st.manual=st.skip?true:st.manual;render();renderTools();
+    if(st.skip){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});}else if(map){setTimeout(function(){map.invalidateSize();},50);}};
 
   // Adresse : autocomplétion (Photon / OpenStreetMap)
   var adr=$('#f-adr'),list=$('#adr-list'),tmr=null,lastQ='';
