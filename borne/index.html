@@ -61,7 +61,24 @@ main .wrap{padding-block:36px 64px}
 .pin-b{background:#995000}.pin-p{background:var(--ink)}
 #map{height:440px;border-radius:14px;overflow:hidden;background:#222;border:3px solid var(--ink)}
 @media(max-width:560px){#map{height:360px}}
-#map-msg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff;background:rgba(20,20,20,.85);border-radius:14px}
+#map-msg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff;background:rgba(20,20,20,.85);border-radius:14px;z-index:500}
+.guide{display:flex;align-items:center;gap:12px;background:var(--orange);color:var(--ink);border-radius:12px;padding:14px 16px;font-weight:700;font-size:17px;line-height:1.3}
+.guide .big{font-family:Rajdhani,sans-serif;font-size:26px;line-height:1;background:var(--ink);color:#fff;border-radius:999px;width:38px;height:38px;flex:none;display:flex;align-items:center;justify-content:center}
+.guide.ok{background:#1d7a46;color:#fff}
+.guide small{display:block;font-weight:500;font-size:14px;margin-top:2px}
+.num{width:24px;height:24px;border-radius:999px;background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.tool.done .num{background:#1d7a46}
+.mapbar{position:absolute;right:10px;top:10px;z-index:450;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0}
+.mb{background:#fff;color:var(--ink);border:1.5px solid var(--ink);padding:8px 12px;font:600 14px Inter,sans-serif;cursor:pointer}
+.mb:first-child{border-radius:999px 0 0 999px}.mb:nth-child(2){border-radius:0 999px 999px 0;border-left:0}
+#reset{border-radius:999px}
+.mb.on{background:var(--ink);color:#fff}
+.alt{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.alt span{font-weight:600}
+.alt .btn{padding:10px 16px;font-size:15px}
+.tap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:440;pointer-events:none;background:rgba(20,20,20,.82);color:#fff;font-weight:700;padding:10px 16px;border-radius:999px;font-size:15px;white-space:nowrap;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:translate(-50%,-50%) scale(1.06)}}
+@media(prefers-reduced-motion:reduce){.tap{animation:none}}
 .distbox{background:var(--ink);color:#fff;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px}
 .distbox h3{font-size:20px}
 #dist{font-size:30px;font-weight:700;color:var(--orange)}
@@ -130,20 +147,28 @@ footer b{color:#fff}
 
     <div class="cols" style="margin-top:22px">
       <div class="left">
+        <div class="guide" id="guide" aria-live="polite"></div>
         <div class="pills" id="mapTools">
-          <button type="button" class="tool on" data-mt="borne"><span class="pin pin-b">VE</span>Placer la borne</button>
-          <button type="button" class="tool" data-mt="panneau"><span class="pin pin-p">P</span>Placer le panneau</button>
+          <button type="button" class="tool on" data-mt="borne"><span class="num">1</span><span class="pin pin-b">VE</span>Où sera la borne</button>
+          <button type="button" class="tool" data-mt="panneau"><span class="num">2</span><span class="pin pin-p">P</span>Où est le panneau</button>
         </div>
         <div style="position:relative">
           <div id="map"></div>
           <div id="map-msg"></div>
+          <div class="mapbar">
+            <button type="button" id="vueSat" class="mb on">Satellite</button><button type="button" id="vuePlan" class="mb">Plan</button>
+            <button type="button" id="reset" class="mb" style="margin-left:8px">↺ Recommencer</button>
+          </div>
         </div>
-        <span class="note">Touchez la carte pour placer la borne, puis le panneau. Vous pouvez glisser les points pour les ajuster.</span>
+        <p class="note" style="margin:0">Des arbres cachent votre maison? Essayez la vue <b>Plan</b>, ou zoomez avec <b>+</b> et <b>−</b>. Vous pouvez glisser les points pour les ajuster.</p>
+        <div class="alt">
+          <span>Vous ne voyez pas bien votre maison?</span>
+          <button type="button" class="btn btn-outline" id="noMap">Choisir la distance moi-même</button>
+        </div>
         <div id="manual" hidden>
-          <p class="q">Distance approximative entre le panneau et la borne</p>
+          <p class="q">Distance approximative entre le panneau et la borne, en suivant les murs</p>
           <div class="pills" data-q="distm"></div>
         </div>
-        <button type="button" class="btn-link note" id="noMap" style="background:none;border:0;padding:0;text-align:left;cursor:pointer;text-decoration:underline">La carte ne fonctionne pas? Indiquer la distance moi-même</button>
       </div>
       <div class="right">
         <div class="distbox">
@@ -253,24 +278,42 @@ footer b{color:#fff}
   function placeMarker(kind,ll){
     if(markers[kind])markers[kind].setLatLng(ll);
     else{markers[kind]=L.marker(ll,{icon:pinIcon(kind),draggable:true}).addTo(map);markers[kind].on('drag',updDist);}
-    if(kind==='borne'&&!markers.panneau){st.mt='panneau';renderTools();}
-    updDist();
+    if(kind==='borne'&&!markers.panneau)st.mt='panneau';
+    updDist();renderTools();
   }
-  function renderTools(){$$('#mapTools [data-mt]').forEach(function(b){var on=b.getAttribute('data-mt')===st.mt;b.className='tool'+(on?' on':'');b.setAttribute('aria-pressed',on);});}
+  function renderTools(){
+    $$('#mapTools [data-mt]').forEach(function(b){var k=b.getAttribute('data-mt'),on=k===st.mt;b.className='tool'+(on?' on':'')+(markers&&markers[k]?' done':'');b.setAttribute('aria-pressed',on);});
+    var g=$('#guide'),hasB=markers.borne,hasP=markers.panneau;
+    if(!st.addr){g.className='guide';g.innerHTML='<span class="big">↑</span><span>Entrez d’abord votre adresse<small>Votre maison apparaîtra sur la carte.</small></span>';}
+    else if(st.manual&&!(hasB&&hasP)){g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Distance choisie à la main<small>Vous pouvez quand même placer les points sur la carte pour plus de précision.</small></span>';}
+    else if(st.mt==='borne'&&!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">1</span><span>Touchez la carte à l’endroit où vous voulez la borne<small>Par exemple, le mur du garage ou près de l’entrée de cour.</small></span>';}
+    else if(!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">2</span><span>Touchez maintenant l’endroit où se trouve votre panneau électrique<small>Si vous ne savez pas exactement, placez-le environ dans la pièce où il se trouve.</small></span>';}
+    else{g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Parfait! La distance est calculée.<small>Glissez les points pour ajuster, puis répondez aux questions.</small></span>';}
+    var t=$('#tapHint');if(t)t.hidden=!st.addr||(hasB&&hasP);if(t)t.textContent=st.mt==='borne'?'👆 Touchez ici pour placer la borne':'👆 Touchez pour placer le panneau';
+  }
   $$('#mapTools [data-mt]').forEach(function(b){b.onclick=function(){st.mt=b.getAttribute('data-mt');renderTools();};});
   function initMap(){
     if(!window.L){mapMsg('La carte n’a pas pu se charger. Indiquez la distance vous-même, sous la carte.');st.manual=true;render();return;}
     var c=st.addr?[st.addr.lat,st.addr.lon]:[45.307,-73.262];
     if(!map){
       map=L.map('map',{zoomControl:true,maxZoom:21,scrollWheelZoom:false}).setView(c,st.addr?19:13);
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:21,maxNativeZoom:19,attribution:'Imagerie © Esri'}).addTo(map);
+      sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:21,maxNativeZoom:19,attribution:'Imagerie © Esri'}).addTo(map);
+      plan=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:21,maxNativeZoom:19,attribution:'© OpenStreetMap'});
+      var hint=document.createElement('div');hint.className='tap';hint.id='tapHint';hint.hidden=true;$('#map').parentNode.appendChild(hint);
       map.on('click',function(e){if(!st.addr){mapMsg('Entrez d’abord votre adresse, plus haut.');setTimeout(function(){mapMsg(st.addr?'':'Entrez votre adresse pour voir votre maison.');},1600);return;}placeMarker(st.mt,e.latlng);});
     } else { map.setView(c,st.addr?19:13); }
     if(st.addr){mapMsg('');if(home)map.removeLayer(home);home=L.circleMarker(c,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);}
     else mapMsg('Entrez votre adresse pour voir votre maison.');
+    renderTools();
     setTimeout(function(){map.invalidateSize();},60);
   }
-  $('#noMap').onclick=function(){st.manual=true;if(markers.borne&&markers.panneau){}render();};
+  var sat=null,plan=null;
+  function vue(p){if(!map)return;if(p){map.removeLayer(sat);plan.addTo(map);}else{map.removeLayer(plan);sat.addTo(map);}$('#vuePlan').className='mb'+(p?' on':'');$('#vueSat').className='mb'+(p?'':' on');}
+  $('#vueSat').onclick=function(){vue(false);};
+  $('#vuePlan').onclick=function(){vue(true);};
+  $('#reset').onclick=function(){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}
+    if(!st.manual)st.dist=null;st.mt='borne';showDist();renderTools();};
+  $('#noMap').onclick=function(){st.manual=true;render();renderTools();$('#manual').scrollIntoView({behavior:'smooth',block:'center'});};
 
   // Adresse : autocomplétion (Photon / OpenStreetMap)
   var adr=$('#f-adr'),list=$('#adr-list'),tmr=null,lastQ='';
