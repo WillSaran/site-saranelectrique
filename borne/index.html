@@ -416,7 +416,7 @@ footer b{color:#fff}
           list.innerHTML='';if(hit){var li0=document.createElement('li');li0.setAttribute('role','option');li0.tabIndex=-1;li0.textContent='Code postal '+pc+' (secteur)';li0._pick=function(){choose('Code postal '+pc,hit,17);};list.appendChild(li0);}}
         var la=document.createElement('li');la.className='alt';la.setAttribute('role','option');la.tabIndex=-1;la.textContent='Adresse pas dans la liste? Garder ce que j’ai écrit et donner une distance approximative →';la._pick=goManual;la.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();goManual();}};list.appendChild(la);
         list.hidden=false;adr.setAttribute('aria-expanded','true');
-      }).catch(function(){list.hidden=true;});
+      }).catch(function(){if(q!==lastQ)return;list.innerHTML='';var la=document.createElement('li');la.className='alt';la.setAttribute('role','option');la.tabIndex=-1;la.textContent='Adresse pas dans la liste? Garder ce que j’ai écrit et donner une distance approximative →';la._pick=goManual;list.appendChild(la);list.hidden=false;adr.setAttribute('aria-expanded','true');});
     },300);
   });
   adr.addEventListener('blur',function(){setTimeout(function(){list.hidden=true;},400);});
