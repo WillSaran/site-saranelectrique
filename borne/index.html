@@ -100,6 +100,12 @@ main .wrap{padding-block:36px 64px}
 .check input{width:20px;height:20px;margin-top:1px;accent-color:var(--ink);flex:none}
 .err{color:#b3261e;font-size:14px;font-weight:600}
 .note{color:var(--mute);font-size:14px}
+.ph-box{margin-top:18px;border:1.5px dashed #bbb;border-radius:14px;padding:18px;background:#FAFAFA}
+.ph-box b{font-size:16px}.ph-box ul{margin:8px 0 12px;padding-left:20px;color:var(--mute);font-size:14px;line-height:1.6}
+.ph-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.ph-thumbs span{position:relative}
+.ph-thumbs img{width:72px;height:72px;object-fit:cover;border-radius:10px;display:block;border:1px solid var(--line)}
+.ph-thumbs button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:999px;border:0;background:#141414;color:#fff;font-size:13px;line-height:22px;cursor:pointer;padding:0}
+
 .subsidy{margin-top:18px;background:var(--soft);border-radius:14px;padding:18px;font-size:14px}
 .subsidy b{color:var(--ink)}
 .subsidy ul{margin:8px 0 0;padding-left:18px;color:var(--mute)}
@@ -213,6 +219,14 @@ footer b{color:#fff}
       <div class="grid2">
         <div class="fld"><label for="f-prenom">Prénom *</label><input id="f-prenom" autocomplete="given-name"></div>
         <div class="fld"><label for="f-mail">Courriel *</label><input id="f-mail" type="email" autocomplete="email"></div>
+      </div>
+      <div class="ph-box">
+        <b>📷 Joignez des photos (facultatif, mais ça change tout)</b>
+        <ul><li>Votre panneau électrique, porte ouverte (on doit voir les disjoncteurs)</li><li>L’étiquette du panneau (marque et ampérage)</li><li>L’endroit où vous voulez la borne</li><li>Le chemin du câble entre le panneau et la borne (sous-sol, garage, mur extérieur)</li></ul>
+        <label class="btn btn-outline" style="cursor:pointer;display:inline-block">+ Ajouter des photos<input id="f-photos" type="file" accept="image/*" multiple hidden></label>
+        <span class="note" id="ph-count" style="margin-left:10px">Aucune photo pour l’instant</span>
+        <div class="ph-thumbs" id="ph-thumbs"></div>
+        <p class="note" style="margin:10px 0 0">Avec vos photos, on peut souvent vous confirmer le prix sans visite. Maximum 8 photos.</p>
       </div>
       <div class="hp" aria-hidden="true"><label for="f-site">Site web</label><input id="f-site" tabindex="-1" autocomplete="off"></div>
       <label class="check" style="margin-top:16px"><input type="checkbox" id="f-consent"><span>J'accepte que Saran Électrique me contacte par courriel au sujet de ma demande. *</span></label>
@@ -373,6 +387,12 @@ footer b{color:#fff}
   };
   $('#back1').onclick=function(){st.step=1;render();window.scrollTo(0,0);setTimeout(function(){if(map)map.invalidateSize();},60);};
 
+
+  // Photos : réduites dans le navigateur (1600 px) avant l'envoi
+  var photos=[];
+  function shrink(file){return new Promise(function(ok){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,1600/Math.max(im.width,im.height));var c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);var u=c.toDataURL('image/jpeg',0.82);ok({n:(file.name||'photo').replace(/\.[^.]+$/,'')+'.jpg',type:'image/jpeg',b64:u.split(',')[1],url:u});};im.onerror=function(){ok(null);};im.src=r.result;};r.onerror=function(){ok(null);};r.readAsDataURL(file);});}
+  function drawPhotos(){var t=$('#ph-thumbs');t.innerHTML='';photos.forEach(function(p,i){var s=document.createElement('span');s.innerHTML='<img alt=""><button type="button" aria-label="Retirer la photo">×</button>';s.firstChild.src=p.url;s.lastChild.onclick=function(){photos.splice(i,1);drawPhotos();};t.appendChild(s);});$('#ph-count').textContent=photos.length?photos.length+' photo(s) ajoutée(s) ✓':'Aucune photo pour l’instant';}
+  $('#f-photos').addEventListener('change',function(ev){var fs=[].slice.call(ev.target.files||[]).filter(function(f){return /^image\//.test(f.type);}).slice(0,8-photos.length);ev.target.value='';Promise.all(fs.map(shrink)).then(function(a){a.forEach(function(p){if(p)photos.push(p);});drawPhotos();});});
   $('#form').addEventListener('submit',function(ev){
     ev.preventDefault();
     var e=$('#err2');e.hidden=true;
@@ -384,13 +404,14 @@ footer b{color:#fff}
       distance:st.dist,mesure:st.manual?'estimée par le client':'mesurée sur la carte',lieu:st.b.lieu,amp:st.b.amp,passage:st.b.passage,achat:st.b.achat,
       marque:$('#f-marque').value,modele:$('#f-modele').value.trim(),
       borneGPS:markers.borne?markers.borne.getLatLng().lat.toFixed(6)+','+markers.borne.getLatLng().lng.toFixed(6):'',
-      panneauGPS:markers.panneau?markers.panneau.getLatLng().lat.toFixed(6)+','+markers.panneau.getLatLng().lng.toFixed(6):''};
+      panneauGPS:markers.panneau?markers.panneau.getLatLng().lat.toFixed(6)+','+markers.panneau.getLatLng().lng.toFixed(6):'',
+      photos:photos.map(function(p){return {n:p.n,type:p.type,b64:p.b64};})};
     if(!ENDPOINT){e.textContent='L’envoi n’est pas encore activé sur cette page.';e.hidden=false;return;}
-    var b=$('#send');b.disabled=true;b.textContent='Envoi…';
+    var b=$('#send');b.disabled=true;b.textContent=photos.length?'Envoi des photos…':'Envoi…';
     fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)})
       .then(function(r){return r.json();})
       .then(function(j){
-        if(j&&j.ok){$('#done-mail').textContent=mail;st.step=3;render();window.scrollTo(0,0);return;}
+        if(j&&j.ok){$('#done-mail').textContent=mail;if(photos.length){var dn=$('#s3 .card .note');if(dn)dn.textContent='Merci pour vos '+photos.length+' photo(s), on les a reçues. Pour une soumission détaillée ou une visite, répondez simplement à notre courriel avec votre nom complet et votre numéro de téléphone.';}st.step=3;render();window.scrollTo(0,0);return;}
         e.textContent=j&&j.err==='limite'?'Vous avez déjà demandé plusieurs estimations aujourd’hui. Réessayez demain ou répondez à notre courriel précédent.':'L’envoi n’a pas fonctionné. Vérifiez votre courriel et réessayez.';
         e.hidden=false;b.disabled=false;b.textContent='Recevoir mon estimation par courriel';
       })
