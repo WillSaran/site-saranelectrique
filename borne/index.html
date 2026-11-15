@@ -239,7 +239,7 @@ footer b{color:#fff}
       <div class="fld"><label for="f-notes">Autre chose à nous dire? <span style="font-weight:400;color:var(--mute)">(facultatif)</span></label><textarea id="f-notes" rows="4" maxlength="1500" placeholder="ex. le panneau est au sous-sol derrière un mur fini, je veux la borne près de la porte de garage, j’ai deux véhicules…" style="padding:14px;border:1.5px solid #ccc;border-radius:10px;font:inherit;font-size:16px;resize:vertical;width:100%"></textarea></div>
     </div>
     <p class="err" id="err1" hidden></p>
-    <div class="bar"><button class="btn btn-outline" id="back0" type="button">← Retour</button><button class="btn btn-dark" id="toS2" type="button">Continuer → Recevoir mon estimation</button></div>
+    <div class="bar"><button class="btn btn-outline" id="back0" type="button">← Retour</button><span style="display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end"><button class="btn btn-outline" id="skipS1b" type="button">Passer cette étape →</button><button class="btn btn-dark" id="toS2" type="button">Continuer → Recevoir mon estimation</button></span></div>
   </section>
 
   <!-- Étape 2 : courriel -->
@@ -250,6 +250,10 @@ footer b{color:#fff}
       <div class="grid2">
         <div class="fld"><label for="f-prenom">Nom complet *</label><input id="f-prenom" autocomplete="name"></div>
         <div class="fld"><label for="f-mail">Courriel *</label><input id="f-mail" type="email" autocomplete="email"></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:14px">
+        <div class="fld" style="flex:1 1 360px;min-width:0"><label for="f-adr2">Adresse des travaux *</label><input id="f-adr2" autocomplete="street-address" placeholder="ex. 1424 1re Rue, Saint-Paul-de-l'Île-aux-Noix"><small class="note" id="adr2-note"></small></div>
+        <div class="fld" style="flex:0 1 140px"><label for="f-unite2">App. / unité</label><input id="f-unite2" placeholder="ex. 204"></div>
       </div>
       <div class="fld" style="margin-top:14px;max-width:340px"><label for="f-tel">Téléphone <span style="font-weight:400;color:var(--mute)">(facultatif, mais recommandé)</span></label><input id="f-tel" type="tel" autocomplete="tel" placeholder="450 555-1234"></div>
       <div class="ph-box">
@@ -453,12 +457,17 @@ footer b{color:#fff}
   $('#f-unite').addEventListener('change',function(){if(this.value.trim()&&!st.b.bat){st.b.bat='multi';render();}});
 
   // Navigation
-  function goStep(n){st.step=n;st.max=Math.max(st.max,n);render();window.scrollTo(0,0);
+  function fillAdr2(){var a2=$('#f-adr2'),u2=$('#f-unite2'),src=(st.addr&&!st.addr.z)?st.addr.label:adr.value.trim();
+    if(!a2.dataset.touched){a2.value=src;}if(!u2.dataset.touched){u2.value=$('#f-unite').value.trim();}
+    $('#adr2-note').textContent=a2.value?'Reprise de l’étape 1 : corrigez-la au besoin.':'Indiquez l’adresse où sera installée la borne (avec la ville).';}
+  ['f-adr2','f-unite2'].forEach(function(id){$('#'+id).addEventListener('input',function(){this.dataset.touched='1';});});
+  function goStep(n){st.step=n;st.max=Math.max(st.max,n);if(n===3)fillAdr2();render();window.scrollTo(0,0);
     if(n===1&&map)setTimeout(function(){map.invalidateSize();},60);if(n===3)setTimeout(function(){$('#f-prenom').focus();},50);}
   $('#steps').addEventListener('click',function(e){var t=e.target.closest('[data-s]');if(t)goStep(Number(t.getAttribute('data-s')));});
   $('#steps').addEventListener('keydown',function(e){var t=e.target.closest('[data-s]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();goStep(Number(t.getAttribute('data-s')));}});
   $('#toS1b').onclick=function(){goStep(2);};
   $('#skipS1').onclick=function(){goStep(2);};
+  $('#skipS1b').onclick=function(){goStep(3);};
   $('#back0').onclick=function(){goStep(1);};
   $('#toS2').onclick=function(){
     // Rien n'est obligatoire à cette étape : ce qui manque sera confirmé avec le client.
@@ -478,8 +487,9 @@ footer b{color:#fff}
     if($('#f-site').value)return;
     var nom=$('#f-prenom').value.trim().replace(/\s+/g,' '),prenom=nom.split(' ')[0],tel=$('#f-tel').value.trim(),mail=$('#f-mail').value.trim();
     if(nom.length<3||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){e.textContent='Entrez votre nom complet et un courriel valide.';e.hidden=false;return;}
+    var adr2=$('#f-adr2').value.trim(),uni2=$('#f-unite2').value.trim();if(adr2.length<5){e.textContent='Entrez l’adresse des travaux.';e.hidden=false;$('#f-adr2').focus();return;}
     if(!$('#f-consent').checked){e.textContent='Cochez la case pour qu’on puisse vous écrire.';e.hidden=false;return;}
-    var data={prenom:prenom,nom:nom,telephone:tel,courriel:mail,consent:'oui',adresse:((st.addr&&!st.addr.z)?st.addr.label:(adr.value.trim()||'Indiquée sur la carte (voir GPS)'))+($('#f-unite').value.trim()?', app. '+$('#f-unite').value.trim():''),unite:$('#f-unite').value.trim(),bat:st.b.bat,notes:$('#f-notes').value.trim().slice(0,1500),ville:st.addr?st.addr.ville:'',
+    var data={prenom:prenom,nom:nom,telephone:tel,courriel:mail,consent:'oui',adresse:adr2+(uni2?', app. '+uni2:''),unite:uni2,bat:st.b.bat,notes:$('#f-notes').value.trim().slice(0,1500),ville:st.addr?st.addr.ville:'',
       distance:st.dist||'',mesure:!st.dist?'non indiquée':(st.manual?'estimée par le client':'mesurée sur la carte'),lieu:st.b.lieu,amp:st.b.amp,passage:st.b.passage,achat:st.b.achat,
       marque:$('#f-marque').value,modele:$('#f-modele').value.trim(),
       borneGPS:markers.borne?markers.borne.getLatLng().lat.toFixed(6)+','+markers.borne.getLatLng().lng.toFixed(6):'',
