@@ -287,7 +287,7 @@ footer b{color:#fff}
     $$('#mapTools [data-mt]').forEach(function(b){var k=b.getAttribute('data-mt'),on=k===st.mt;b.className='tool'+(on?' on':'')+(markers&&markers[k]?' placed':'');b.setAttribute('aria-pressed',on);});
     var g=$('#guide'),hasB=markers.borne,hasP=markers.panneau;
     if(!st.addr){g.className='guide';g.innerHTML='<span class="big">↑</span><span>Entrez d’abord votre adresse<small>Votre maison apparaîtra sur la carte.</small></span>';}
-    else if(st.manual&&!(hasB&&hasP)){g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Distance choisie à la main<small>Vous pouvez quand même placer les points sur la carte pour plus de précision.</small></span>';}
+    else if(st.manual&&!(hasB&&hasP)){g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Distance choisie à la main<small>'+(st.skip?'Choisissez la distance approximative ci-dessous.':'Vous pouvez quand même placer les points sur la carte pour plus de précision.')+'</small></span>';}
     else if(st.mt==='borne'&&!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">1</span><span>Touchez la carte à l’endroit où vous voulez la borne<small>Par exemple, le mur du garage ou près de l’entrée de cour.</small></span>';}
     else if(!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">2</span><span>Touchez maintenant l’endroit où se trouve votre panneau électrique<small>Si vous ne savez pas exactement, placez-le environ dans la pièce où il se trouve.</small></span>';}
     else{g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Parfait! La distance est calculée.<small>Glissez les points pour ajuster, puis répondez aux questions.</small></span>';}
