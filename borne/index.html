@@ -67,7 +67,7 @@ main .wrap{padding-block:36px 64px}
 .guide.ok{background:#1d7a46;color:#fff}
 .guide small{display:block;font-weight:500;font-size:14px;margin-top:2px}
 .num{width:24px;height:24px;border-radius:999px;background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
-.tool.done .num{background:#1d7a46}
+.tool.placed .num{background:#1d7a46}
 .mapbar{position:absolute;right:10px;top:10px;z-index:450;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0}
 .mb{background:#fff;color:var(--ink);border:1.5px solid var(--ink);padding:8px 12px;font:600 14px Inter,sans-serif;cursor:pointer}
 .mb:first-child{border-radius:999px 0 0 999px}.mb:nth-child(2){border-radius:0 999px 999px 0;border-left:0}
@@ -282,7 +282,7 @@ footer b{color:#fff}
     updDist();renderTools();
   }
   function renderTools(){
-    $$('#mapTools [data-mt]').forEach(function(b){var k=b.getAttribute('data-mt'),on=k===st.mt;b.className='tool'+(on?' on':'')+(markers&&markers[k]?' done':'');b.setAttribute('aria-pressed',on);});
+    $$('#mapTools [data-mt]').forEach(function(b){var k=b.getAttribute('data-mt'),on=k===st.mt;b.className='tool'+(on?' on':'')+(markers&&markers[k]?' placed':'');b.setAttribute('aria-pressed',on);});
     var g=$('#guide'),hasB=markers.borne,hasP=markers.panneau;
     if(!st.addr){g.className='guide';g.innerHTML='<span class="big">↑</span><span>Entrez d’abord votre adresse<small>Votre maison apparaîtra sur la carte.</small></span>';}
     else if(st.manual&&!(hasB&&hasP)){g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Distance choisie à la main<small>Vous pouvez quand même placer les points sur la carte pour plus de précision.</small></span>';}
