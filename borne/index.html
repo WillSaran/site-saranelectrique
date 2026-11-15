@@ -202,7 +202,7 @@ footer b{color:#fff}
           </div>
         </div>
         <p class="note" style="margin:0">Vous pouvez zoomer avec <b>+</b> et <b>−</b> (ou avec deux doigts).</p>
-        <div id="routeQ" hidden style="margin-top:10px"><p class="q" style="margin-bottom:8px">Le câble entre le panneau et la borne va…</p><div class="pills"><button type="button" class="pill" data-route="droit">En ligne droite (même mur)</button><button type="button" class="pill" data-route="coin">En contournant un coin</button></div></div>
+        <div id="rotQ" hidden style="margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px"><p class="q" style="margin:0 0 6px">Alignez le carré orange sur les murs de votre maison</p><input id="rot" type="range" min="-45" max="45" step="1" value="0" style="width:100%;accent-color:#FA890D" aria-label="Angle de la maison"><p class="note" style="margin:6px 0 0">Le fil est calculé à 90°, le long des murs : si la borne et le panneau sont sur le même mur, c’est une ligne droite.</p></div>
         </div>
         <div id="manual" hidden>
           <p class="q">Distance approximative entre le panneau et la borne, en suivant les murs</p>
@@ -236,6 +236,7 @@ footer b{color:#fff}
             <div class="fld"><label for="f-modele">Modèle</label><input id="f-modele" placeholder="ex. FLO Home X5, Grizzl-E Classic…"></div>
           </div>
         </div>
+      <div class="fld"><label for="f-notes">Autre chose à nous dire? <span style="font-weight:400;color:var(--mute)">(facultatif)</span></label><textarea id="f-notes" rows="4" maxlength="1500" placeholder="ex. le panneau est au sous-sol derrière un mur fini, je veux la borne près de la porte de garage, j’ai deux véhicules…" style="padding:14px;border:1.5px solid #ccc;border-radius:10px;font:inherit;font-size:16px;resize:vertical;width:100%"></textarea></div>
     </div>
     <p class="err" id="err1" hidden></p>
     <div class="bar"><button class="btn btn-outline" id="back0" type="button">← Retour</button><button class="btn btn-dark" id="toS2" type="button">Continuer → Recevoir mon estimation</button></div>
@@ -314,7 +315,7 @@ footer b{color:#fff}
     achat:[['oui','Oui, je l’ai'],['non','Non, fournissez-la-moi']],
     bat:[['maison','Maison'],['multi','Condo / appartement / plex'],['commerce','Commerce']],
     distm:[['10','Moins de 15 pi'],['25','15 à 30 pi'],['40','30 à 50 pi'],['60','Plus de 50 pi']]};
-  var st={step:1,max:1,route:'droit',houseSet:false,addr:null,dist:null,manual:false,mt:'borne',b:{bat:null,lieu:null,amp:null,passage:null,achat:null,distm:null}};
+  var st={step:1,max:1,ang:0,houseSet:false,addr:null,dist:null,manual:false,mt:'borne',b:{bat:null,lieu:null,amp:null,passage:null,achat:null,distm:null}};
 
   function render(){
     ['s1','s1b','s2','s3'].forEach(function(id,k){$('#'+id).hidden=st.step!==k+1;});
@@ -340,21 +341,26 @@ footer b{color:#fff}
     $('#s3s').textContent=com?'Nous vous avons écrit à':'Nous venons de l’envoyer à';
     $('#s3c').textContent=com?'Pour planifier la visite':'Pour une soumission détaillée ou une visite';
   }
-  function showDist(){$('#dist').textContent=st.dist?('≈ '+st.dist+' pi'+(st.manual?'':' ('+Math.round(st.dist/3.281)+' m)'+(st.route==='coin'?', avec un coin':', en ligne droite'))):(st.manual?'Choisissez la distance':(markers.borne?'Placez le panneau':'Placez la borne'));
-    var rq=$('#routeQ');if(rq){rq.hidden=!(markers.borne&&markers.panneau);$$('[data-route]',rq).forEach(function(b){b.className='pill'+(st.route===b.getAttribute('data-route')?' on':'');});}}
+  function showDist(){$('#dist').textContent=st.dist?('≈ '+st.dist+' pi'+(st.manual?'':' ('+Math.round(st.dist/3.281)+' m)'+', à 90° le long des murs')):(st.manual?'Choisissez la distance':(markers.borne?'Placez le panneau':'Placez la borne'));
+    var rq=$('#rotQ');if(rq)rq.hidden=!st.houseSet||st.manual;}
 
   // Carte (Leaflet + imagerie satellite Esri)
-  var map=null,markers={borne:null,panneau:null},line=null,home=null;
+  var map=null,markers={borne:null,panneau:null},line=null,home=null,sq=null;
+  var ZP=21;function rotv(x,y,a){var c=Math.cos(a),s=Math.sin(a);return [x*c-y*s,x*s+y*c];}
+  function drawSq(){if(!map)return;if(sq){map.removeLayer(sq);sq=null;}if(!st.houseSet||!home)return;var h=map.project(home.getLatLng(),ZP),a=st.ang*Math.PI/180,r=140;
+    sq=L.polygon([[-r,-r],[r,-r],[r,r],[-r,r]].map(function(q){var v=rotv(q[0],q[1],a);return map.unproject(L.point(h.x+v[0],h.y+v[1]),ZP);}),{color:'#FA890D',weight:3,fill:false,dashArray:'6 6',interactive:false}).addTo(map);}
   function mapMsg(t){var m=$('#map-msg');m.textContent=t||'';m.style.display=t?'flex':'none';}
   function pinIcon(kind){var B=kind==='borne';
     var svg=B?'<svg width="44" height="46"><line x1="0" y1="46" x2="40" y2="6" stroke="#fff" stroke-width="2.5"/></svg>':'<svg width="46" height="44"><line x1="46" y1="0" x2="6" y2="40" stroke="#fff" stroke-width="2.5"/></svg>';
     return L.divIcon({className:'',html:'<div class="mk '+(B?'mk-b':'mk-p')+'">'+svg+'<span class="lbl">'+(B?'Borne de recharge':'Panneau électrique')+'</span><i class="dot"></i></div>',iconSize:[0,0],iconAnchor:[0,0]});}
   function updDist(){
     if(line){map.removeLayer(line);line=null;}
-    if(markers.borne&&markers.panneau){var P=markers.panneau.getLatLng(),B=markers.borne.getLatLng(),d=P.distanceTo(B);
-      // Ligne droite si les deux sont sur le même mur; sinon on ajoute le détour d'un coin (environ 30 % de plus), peu importe l'angle de la maison.
-      line=L.polyline([P,B],{color:'#FA890D',weight:4,dashArray:'8 6'}).addTo(map);
-      st.dist=Math.max(1,Math.round(d*3.281*(st.route==='coin'?1.3:1)));st.manual=false;}
+    if(markers.borne&&markers.panneau){var P=markers.panneau.getLatLng(),B=markers.borne.getLatLng();
+      // Trajet à 90° aligné sur les murs de la maison (angle du carré orange) : même mur = ligne droite.
+      var p=map.project(P,ZP),b=map.project(B,ZP),a=st.ang*Math.PI/180,u=[Math.cos(a),Math.sin(a)],v=[-Math.sin(a),Math.cos(a)],dx=b.x-p.x,dy=b.y-p.y,l1=dx*u[0]+dy*u[1],l2=dx*v[0]+dy*v[1];
+      var K=map.unproject(L.point(p.x+l1*u[0],p.y+l1*u[1]),ZP),pix=Math.sqrt(dx*dx+dy*dy),mpp=pix?P.distanceTo(B)/pix:0;
+      line=L.polyline([P,K,B],{color:'#FA890D',weight:4,dashArray:'8 6'}).addTo(map);
+      st.dist=Math.max(1,Math.round((Math.abs(l1)+Math.abs(l2))*mpp*3.281));st.manual=false;}
     else if(!st.manual) st.dist=null;
     showDist();
   }
@@ -365,16 +371,16 @@ footer b{color:#fff}
     updDist();renderTools();
   }
   function ready(){return true;}
-  function needHouse(){return (!st.addr||!!st.addr.z)&&!st.houseSet&&!markers.borne;}
+  function needHouse(){return !st.houseSet&&!markers.borne;}
   function renderTools(){
     $$('#mapTools [data-mt]').forEach(function(b){var k=b.getAttribute('data-mt'),on=k===st.mt;b.className='tool'+(on?' on':'')+(markers&&markers[k]?' placed':'');b.setAttribute('aria-pressed',on);});
     var g=$('#guide'),hasB=markers.borne,hasP=markers.panneau;
-    if(needHouse()&&!st.manual){g.className='guide';g.innerHTML='<span class="big">⌂</span><span>'+(st.addr?'Touchez votre maison sur la carte':'Entrez votre adresse, ou touchez votre maison sur la carte')+'<small>Zoomez et déplacez la carte au besoin : on va centrer et agrandir votre maison.</small></span>';}
+    if(needHouse()&&!st.manual){g.className='guide';g.innerHTML='<span class="big">⌂</span><span>'+(st.addr?'Touchez le centre de votre maison':'Entrez votre adresse, ou touchez le centre de votre maison sur la carte')+'<small>Zoomez et déplacez la carte au besoin : on va centrer et agrandir votre maison.</small></span>';}
     else if(st.manual&&!(hasB&&hasP)){g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Distance choisie à la main<small>'+(st.skip?'Choisissez la distance approximative ci-dessous.':'Vous pouvez quand même placer les points sur la carte pour plus de précision.')+'</small></span>';}
     else if(st.mt==='borne'&&!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">1</span><span>Touchez la carte à l’endroit où vous voulez la borne<small>Par exemple, le mur du garage ou près de l’entrée de cour.</small></span>';}
     else if(!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">2</span><span>Touchez maintenant l’endroit où se trouve votre panneau électrique<small>Si vous ne savez pas exactement, placez-le environ dans la pièce où il se trouve.</small></span>';}
     else{g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Parfait! La distance est calculée.<small>Glissez les points pour ajuster, puis répondez aux questions.</small></span>';}
-    var t=$('#tapHint');if(t)t.hidden=!ready()||(hasB&&hasP);if(t)t.textContent=needHouse()?'👆 Touchez votre maison':(st.mt==='borne'?'👆 Touchez pour placer la borne':'👆 Touchez pour placer le panneau');
+    var t=$('#tapHint');if(t)t.hidden=!ready()||(hasB&&hasP);if(t)t.textContent=needHouse()?'👆 Touchez le centre de votre maison':(st.mt==='borne'?'👆 Touchez pour placer la borne':'👆 Touchez pour placer le panneau');
   }
   $$('#mapTools [data-mt]').forEach(function(b){b.onclick=function(){st.mt=b.getAttribute('data-mt');renderTools();};});
   function initMap(){
@@ -387,18 +393,18 @@ footer b{color:#fff}
       plan.on('tileerror',function(){if(!fallback){fallback=true;vue(false);}});
       var hint=document.createElement('div');hint.className='tap';hint.id='tapHint';hint.hidden=true;$('#map').parentNode.appendChild(hint);
       map.on('click',function(e){mapMsg('');
-        if(needHouse()){st.houseSet=true;st.free=true;if(home)map.removeLayer(home);home=L.circleMarker(e.latlng,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);map.setView(e.latlng,Math.max(map.getZoom(),20));renderTools();return;}
+        if(needHouse()){st.houseSet=true;st.free=true;if(home)map.removeLayer(home);home=L.circleMarker(e.latlng,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);map.setView(e.latlng,Math.max(map.getZoom(),20));drawSq();showDist();renderTools();setTimeout(function(){$('#rotQ').scrollIntoView({behavior:'smooth',block:'nearest'});},300);return;}
         placeMarker(st.mt,e.latlng);});
     } else if(st.addr){ map.setView(c,z); }
-    mapMsg('');if(st.addr&&!st.addr.z){st.houseSet=true;if(home)map.removeLayer(home);home=L.circleMarker(c,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);}
+    mapMsg('');
     renderTools();
     setTimeout(function(){map.invalidateSize();},60);
   }
   var sat=null,plan=null,fallback=false;
   function vue(p){if(!map)return;if(p){map.removeLayer(sat);plan.addTo(map);}else{map.removeLayer(plan);sat.addTo(map);}}
-  $$('[data-route]').forEach(function(b){b.onclick=function(){st.route=b.getAttribute('data-route');updDist();};});
+  $('#rot').addEventListener('input',function(){st.ang=Number(this.value);drawSq();updDist();});
   $('#reset').onclick=function(){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}
-    if(!st.manual)st.dist=null;st.mt='borne';if(!st.addr||st.addr.z){st.houseSet=false;if(home){map.removeLayer(home);home=null;}}showDist();renderTools();};
+    if(!st.manual)st.dist=null;st.mt='borne';st.houseSet=false;st.ang=0;$('#rot').value=0;if(home){map.removeLayer(home);home=null;}drawSq();showDist();renderTools();};
   $('#skipMap').onclick=function(){st.skip=!st.skip;st.manual=st.skip?true:st.manual;render();renderTools();
     if(st.skip){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});}else if(map){setTimeout(function(){map.invalidateSize();},50);}};
 
@@ -411,8 +417,8 @@ footer b{color:#fff}
     (j.features||[]).forEach(function(x){delete x.properties.postcode;});return j;});}
   var adr=$('#f-adr'),list=$('#adr-list'),tmr=null,lastQ='';
   function fmt(p){return [[p.housenumber,p.street||p.name].filter(Boolean).join(' '),p.city||p.town||p.village,(p.state==='Québec'||p.state==='Quebec')?'QC':p.state,p.postcode].filter(Boolean).join(', ');}
-  function choose(t,x,z){adr.value=t;adr.blur();st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||'',z:z||20};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=z?'✓ Secteur trouvé : zoomez sur votre maison, puis placez la borne':'✓ Adresse trouvée';$('#adr-ok').hidden=false;initMap();}
-  function goManual(){adr.blur();st.addr=null;st.free=false;st.houseSet=false;if(map){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}if(home){map.removeLayer(home);home=null;}}st.dist=st.b.distm?Number(st.b.distm):null;st.skip=true;st.manual=true;showDist();list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent='✓ Adresse notée : indiquez maintenant la distance approximative entre le panneau et la borne.';$('#adr-ok').hidden=false;render();renderTools();setTimeout(function(){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});},120);}
+  function choose(t,x,z){adr.value=t;adr.blur();if(map&&!markers.borne){st.houseSet=false;if(home){map.removeLayer(home);home=null;}drawSq();}st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||'',z:z||20};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=z?'✓ Secteur trouvé : zoomez sur votre maison, puis placez la borne':'✓ Adresse trouvée';$('#adr-ok').hidden=false;initMap();}
+  function goManual(){adr.blur();st.addr=null;st.free=false;st.houseSet=false;if(map){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}if(home){map.removeLayer(home);home=null;}drawSq();}st.dist=st.b.distm?Number(st.b.distm):null;st.skip=true;st.manual=true;showDist();list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent='✓ Adresse notée : indiquez maintenant la distance approximative entre le panneau et la borne.';$('#adr-ok').hidden=false;render();renderTools();setTimeout(function(){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});},120);}
   function goFree(){adr.blur();st.free=true;st.skip=false;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=adr.value.trim()?'✓ Adresse notée : trouvez maintenant votre maison sur la carte':'Trouvez votre maison sur la carte';$('#adr-ok').hidden=false;render();initMap();setTimeout(function(){$('#map').scrollIntoView({behavior:'smooth',block:'center'});},80);}
   $('#skipMap2').onclick=goManual;
   var CP=/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
@@ -472,7 +478,7 @@ footer b{color:#fff}
     var nom=$('#f-prenom').value.trim().replace(/\s+/g,' '),prenom=nom.split(' ')[0],tel=$('#f-tel').value.trim(),mail=$('#f-mail').value.trim();
     if(nom.length<3||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){e.textContent='Entrez votre nom complet et un courriel valide.';e.hidden=false;return;}
     if(!$('#f-consent').checked){e.textContent='Cochez la case pour qu’on puisse vous écrire.';e.hidden=false;return;}
-    var data={prenom:prenom,nom:nom,telephone:tel,courriel:mail,consent:'oui',adresse:((st.addr&&!st.addr.z)?st.addr.label:(adr.value.trim()||'Indiquée sur la carte (voir GPS)'))+($('#f-unite').value.trim()?', app. '+$('#f-unite').value.trim():''),unite:$('#f-unite').value.trim(),bat:st.b.bat,ville:st.addr?st.addr.ville:'',
+    var data={prenom:prenom,nom:nom,telephone:tel,courriel:mail,consent:'oui',adresse:((st.addr&&!st.addr.z)?st.addr.label:(adr.value.trim()||'Indiquée sur la carte (voir GPS)'))+($('#f-unite').value.trim()?', app. '+$('#f-unite').value.trim():''),unite:$('#f-unite').value.trim(),bat:st.b.bat,notes:$('#f-notes').value.trim().slice(0,1500),ville:st.addr?st.addr.ville:'',
       distance:st.dist||'',mesure:!st.dist?'non indiquée':(st.manual?'estimée par le client':'mesurée sur la carte'),lieu:st.b.lieu,amp:st.b.amp,passage:st.b.passage,achat:st.b.achat,
       marque:$('#f-marque').value,modele:$('#f-modele').value.trim(),
       borneGPS:markers.borne?markers.borne.getLatLng().lat.toFixed(6)+','+markers.borne.getLatLng().lng.toFixed(6):'',
