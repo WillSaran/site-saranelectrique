@@ -70,7 +70,7 @@ main .wrap{padding-block:36px 64px}
 .tool.placed .num{background:#1d7a46}
 .mapbar{position:absolute;right:10px;top:10px;z-index:450;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0}
 .mb{background:#fff;color:var(--ink);border:1.5px solid var(--ink);padding:8px 12px;font:600 14px Inter,sans-serif;cursor:pointer}
-#vuePlan{border-radius:999px 0 0 999px}#vueSat{border-radius:0 999px 999px 0;border-left:0}
+
 #reset{border-radius:999px}
 .mb.on{background:var(--ink);color:#fff}
 .alt{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
@@ -156,11 +156,11 @@ footer b{color:#fff}
           <div id="map"></div>
           <div id="map-msg"></div>
           <div class="mapbar">
-            <button type="button" id="vuePlan" class="mb on">Sans feuilles</button><button type="button" id="vueSat" class="mb">Satellite (été)</button>
+            <span class="mb on" id="vuePlan" style="border-radius:999px;cursor:default">Satellite</span>
             <button type="button" id="reset" class="mb" style="margin-left:8px">↺ Recommencer</button>
           </div>
         </div>
-        <p class="note" style="margin:0">La photo <b>Sans feuilles</b> est prise au printemps, avant que les arbres cachent les maisons. Vous pouvez aussi essayer <b>Satellite (été)</b> ou zoomer avec <b>+</b> et <b>−</b>. Vous pouvez glisser les points pour les ajuster.</p>
+        <p class="note" style="margin:0">La photo satellite est prise au printemps, avant que les arbres cachent les maisons. Vous pouvez zoomer avec <b>+</b> et <b>−</b>. Vous pouvez glisser les points pour les ajuster.</p>
         <div class="alt">
           <span>Vous ne voyez pas bien votre maison?</span>
           <button type="button" class="btn btn-outline" id="noMap">Choisir la distance moi-même</button>
@@ -309,9 +309,7 @@ footer b{color:#fff}
     setTimeout(function(){map.invalidateSize();},60);
   }
   var sat=null,plan=null,fallback=false;
-  function vue(p){if(!map)return;if(p){map.removeLayer(sat);plan.addTo(map);}else{map.removeLayer(plan);sat.addTo(map);}$('#vuePlan').className='mb'+(p?' on':'');$('#vueSat').className='mb'+(p?'':' on');}
-  $('#vueSat').onclick=function(){vue(false);};
-  $('#vuePlan').onclick=function(){vue(true);};
+  function vue(p){if(!map)return;if(p){map.removeLayer(sat);plan.addTo(map);}else{map.removeLayer(plan);sat.addTo(map);}}
   $('#reset').onclick=function(){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}
     if(!st.manual)st.dist=null;st.mt='borne';showDist();renderTools();};
   $('#noMap').onclick=function(){st.manual=true;render();renderTools();$('#manual').scrollIntoView({behavior:'smooth',block:'center'});};
