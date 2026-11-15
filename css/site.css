@@ -91,6 +91,12 @@ img{max-width:100%}
 .mini:hover{border-color:#FA890D}
 .badge{display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid #E3E3E3;border-radius:14px;padding:20px}
 .badge b{font-family:Rajdhani,sans-serif;font-size:22px}
+
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.pcard2{background:#fff;border:1px solid #E3E3E3;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:8px}
+.pcard2 b{font-family:Rajdhani,sans-serif;font-size:22px}.pcard2 p{margin:0;color:#3a3a3a;line-height:1.55;font-size:15px}.pcard2 a{margin-top:auto;color:#995000;font-weight:600;font-size:14px}
+.ptag{background:#FFF4E6;color:#995000;border:1px solid #FA890D;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;white-space:nowrap}
+.smartbox{margin-top:16px;background:#141414;color:#EDEDED;border-radius:14px;padding:18px 20px;line-height:1.6}.smartbox a{color:#FA890D}
 .avis-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .avis{position:relative;background:#fff;border:1px solid #E3E3E3;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:8px;margin:0;align-self:start}
 .avis blockquote{margin:0;color:#2b2b2b;line-height:1.55;font-size:15px}
