@@ -183,7 +183,7 @@ footer b{color:#fff}
     </div>
     <div style="margin-top:14px"><p class="q" style="margin-bottom:8px">Type de bâtiment <span style="font-weight:400;color:var(--mute)">(facultatif)</span></p><div class="pills" data-q="bat"></div>
       <p class="note" id="bat-note" hidden style="margin:10px 0 0;max-width:720px;background:#FFF4E6;border:1px solid #FA890D;border-radius:10px;padding:10px 12px;color:#4D4D4D">En condo, en appartement ou en plex, l’installation est souvent plus complexe : panneau et stationnement parfois éloignés, accord du syndicat ou du propriétaire, et possiblement un <b>contrôleur de charge</b> si la capacité électrique est limitée. On vous donne une estimation de départ, puis on évalue les travaux avec vous.</p></div>
-    <p class="adr-alt">Vous pouvez aussi écrire seulement votre <b>code postal</b>. Adresse introuvable? <button type="button" id="freeMap">Trouver ma maison directement sur la carte</button> ou <button type="button" id="skipMap2">donner une distance approximative</button>.</p>
+    <p class="adr-alt">Vous pouvez aussi écrire seulement votre <b>code postal</b>. Adresse introuvable? <button type="button" id="skipMap2">Donnez plutôt une distance approximative entre le panneau et la borne</button>.</p>
 
     <div class="cols" style="margin-top:22px">
       <div class="left">
@@ -399,8 +399,7 @@ footer b{color:#fff}
   function choose(t,x,z){adr.value=t;adr.blur();st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||'',z:z||20};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=z?'✓ Secteur trouvé : zoomez sur votre maison, puis placez la borne':'✓ Adresse trouvée';$('#adr-ok').hidden=false;initMap();}
   function goManual(){adr.blur();st.skip=true;st.manual=true;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent='✓ Adresse notée : indiquez maintenant la distance approximative entre le panneau et la borne.';$('#adr-ok').hidden=false;render();renderTools();setTimeout(function(){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});},120);}
   function goFree(){adr.blur();st.free=true;st.skip=false;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=adr.value.trim()?'✓ Adresse notée : trouvez maintenant votre maison sur la carte':'Trouvez votre maison sur la carte';$('#adr-ok').hidden=false;render();initMap();setTimeout(function(){$('#map').scrollIntoView({behavior:'smooth',block:'center'});},80);}
-  $('#freeMap').onclick=goFree;
-  $('#skipMap2').onclick=function(){if(!st.skip)$('#skipMap').click();};
+  $('#skipMap2').onclick=goManual;
   var CP=/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
   adr.addEventListener('input',function(){
     st.addr=null;$('#adr-ok').hidden=true;var q=adr.value.trim();clearTimeout(tmr);
