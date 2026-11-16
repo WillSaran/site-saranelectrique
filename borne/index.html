@@ -482,7 +482,8 @@ footer b{color:#fff}
     if(!a2.dataset.touched){a2.value=src;}if(!u2.dataset.touched){u2.value=$('#f-unite').value.trim();}
     $('#adr2-note').textContent=a2.value?'Reprise de l’étape 1 : corrigez-la au besoin.':'Indiquez l’adresse où sera installée la borne (avec la ville).';}
   ['f-adr2','f-unite2'].forEach(function(id){$('#'+id).addEventListener('input',function(){this.dataset.touched='1';});});
-  function goStep(n){st.step=n;st.max=Math.max(st.max,n);if(n===3)fillAdr2();render();window.scrollTo(0,0);
+  var sentIC=false;
+  function goStep(n){if(n>=2&&!sentIC){sentIC=true;if(window.saranTrack)saranTrack('InitiateCheckout',{content_name:'Borne de recharge'});}st.step=n;st.max=Math.max(st.max,n);if(n===3)fillAdr2();render();window.scrollTo(0,0);
     if(n===1&&map)setTimeout(function(){map.invalidateSize();},60);if(n===3)setTimeout(function(){$('#f-prenom').focus();},50);}
   $('#steps').addEventListener('click',function(e){var t=e.target.closest('[data-s]');if(t)goStep(Number(t.getAttribute('data-s')));});
   $('#steps').addEventListener('keydown',function(e){var t=e.target.closest('[data-s]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();goStep(Number(t.getAttribute('data-s')));}});
@@ -555,7 +556,7 @@ footer b{color:#fff}
     snapshot().then(function(img){if(img)data.carte=img;return fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});})
       .then(function(r){return r.json();})
       .then(function(j){
-        if(j&&j.ok){b.disabled=false;$('#done-mail').textContent=mail;if(photos.length){var dn=$('#s3 .card .note');if(dn)dn.textContent='Merci pour vos '+photos.length+' photo(s), on les a reçues. Pour une soumission détaillée ou une visite, répondez simplement à notre courriel.';}st.step=4;st.max=4;render();window.scrollTo(0,0);return;}
+        if(j&&j.ok){if(window.saranTrack)saranTrack('Lead',{content_name:'Borne de recharge'});b.disabled=false;$('#done-mail').textContent=mail;if(photos.length){var dn=$('#s3 .card .note');if(dn)dn.textContent='Merci pour vos '+photos.length+' photo(s), on les a reçues. Pour une soumission détaillée ou une visite, répondez simplement à notre courriel.';}st.step=4;st.max=4;render();window.scrollTo(0,0);return;}
         e.textContent=j&&j.err==='limite'?'Vous avez déjà demandé plusieurs estimations aujourd’hui. Réessayez demain ou répondez à notre courriel précédent.':'L’envoi n’a pas fonctionné. Vérifiez votre courriel et réessayez.';
         e.hidden=false;b.disabled=false;render();
       })
@@ -563,6 +564,25 @@ footer b{color:#fff}
   });
 
   render();renderTools();initMap();
+})();
+</script>
+<div id="cookie" hidden style="position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;max-width:640px;margin:0 auto;background:#141414;color:#EDEDED;border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.5;box-shadow:0 8px 30px rgba(0,0,0,.35);display:none;flex-wrap:wrap;gap:10px;align-items:center">
+  <span style="flex:1 1 300px">On utilise des témoins (Meta) pour mesurer l’efficacité de nos publicités. Vous pouvez refuser : la page fonctionne pareil.</span>
+  <span style="display:flex;gap:8px"><button type="button" id="ck-no" style="background:transparent;color:#fff;border:1.5px solid #666;border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer">Refuser</button><button type="button" id="ck-ok" style="background:#FA890D;color:#141414;border:0;border-radius:999px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer">Accepter</button></span>
+</div>
+<script>
+/* Pixel Meta — chargé seulement si le visiteur accepte (Loi 25). Mettre l'ID du pixel ci-dessous. */
+(function(){
+  var PIXEL_ID='', K='saran-temoins', box=document.getElementById('cookie');
+  function load(){ if(!PIXEL_ID||window.fbq)return;
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init',PIXEL_ID);fbq('track','PageView');}
+  window.saranTrack=function(ev,p){try{if(window.fbq)fbq('track',ev,p||{});}catch(e){}};
+  var c=null;try{c=localStorage.getItem(K);}catch(e){}
+  if(c==='oui')load(); else if(c!=='non'&&PIXEL_ID&&box){box.hidden=false;box.style.display='flex';}
+  function set(v){try{localStorage.setItem(K,v);}catch(e){}if(box){box.hidden=true;box.style.display='none';}if(v==='oui')load();}
+  document.getElementById('ck-ok').onclick=function(){set('oui');};
+  document.getElementById('ck-no').onclick=function(){set('non');};
 })();
 </script>
 </body>
