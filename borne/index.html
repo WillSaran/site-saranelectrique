@@ -153,6 +153,7 @@ footer b{color:#fff}
 .stars{color:#FA890D;letter-spacing:2px;font-size:18px}
 .avis-top{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:22px}
 .avis-note{display:flex;align-items:center;gap:12px}.avis-note b{font-family:Rajdhani,sans-serif;font-size:44px;line-height:1}
+#stars button{background:none;border:0;padding:0 2px;font-size:34px;line-height:1;color:#D0D0D0;cursor:pointer;touch-action:manipulation}#stars button.on{color:#FA890D}
 </style>
 </head>
 <body>
@@ -307,6 +308,18 @@ footer b{color:#fff}
       <div class="card" style="text-align:left;width:100%">
         <b id="s3c">Pour une soumission détaillée ou une visite</b>
         <p class="note" style="margin:6px 0 0">Répondez simplement à notre courriel avec des photos de votre panneau électrique (porte ouverte) et de l'emplacement souhaité.</p>
+      </div>
+      <div class="card" id="rate" style="text-align:left;width:100%">
+        <b>Comment avez-vous trouvé cette demande d’estimation ?</b>
+        <div id="stars" role="radiogroup" aria-label="Note de 1 à 5 étoiles" style="display:flex;gap:6px;margin:8px 0 4px">
+          <button type="button" data-n="1" aria-label="1 étoile">★</button><button type="button" data-n="2" aria-label="2 étoiles">★</button><button type="button" data-n="3" aria-label="3 étoiles">★</button><button type="button" data-n="4" aria-label="4 étoiles">★</button><button type="button" data-n="5" aria-label="5 étoiles">★</button>
+        </div>
+        <div id="rate-more" hidden>
+          <textarea id="rate-txt" rows="2" maxlength="500" placeholder="Un commentaire ? (facultatif)" style="width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:15px"></textarea>
+          <button type="button" class="btn btn-dark" id="rate-send" style="margin-top:8px">Envoyer ma note</button>
+        </div>
+        <p id="rate-ok" hidden style="margin:6px 0 0;color:#1E7B34;font-weight:600">Merci pour votre note !</p>
+        <p class="note" style="margin:6px 0 0">Votre avis nous aide à améliorer notre service à la clientèle.</p>
       </div>
     </div>
   </section>
@@ -584,6 +597,16 @@ footer b{color:#fff}
   document.getElementById('ck-ok').onclick=function(){set('oui');};
   document.getElementById('ck-no').onclick=function(){set('non');};
 })();
+
+  (function(){var n=0,sent=false,bs=document.querySelectorAll('#stars button');
+    function paint(k){bs.forEach(function(b){b.classList.toggle('on',Number(b.getAttribute('data-n'))<=k);});}
+    bs.forEach(function(b){b.onclick=function(){if(sent)return;n=Number(b.getAttribute('data-n'));paint(n);document.getElementById('rate-more').hidden=false;};
+      b.onmouseenter=function(){if(!sent)paint(Number(b.getAttribute('data-n')));};b.onmouseleave=function(){if(!sent)paint(n);};});
+    document.getElementById('rate-send').onclick=function(){if(!n||sent)return;sent=true;
+      var m=document.getElementById('done-mail');
+      fetch('https://script.google.com/macros/s/AKfycbxextadczKCEGtkPY8XNiTdVMGSu5R_-S92EzC5HIc2AZdThcI8Pv_E33TxijRzb1Ae/exec',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({type:'avis',note:n,commentaire:document.getElementById('rate-txt').value.slice(0,500),courriel:m?m.textContent:''})}).catch(function(){});
+      document.getElementById('rate-more').hidden=true;document.getElementById('rate-ok').hidden=false;};
+  })();
 </script>
 </body>
 </html>
