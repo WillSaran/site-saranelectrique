@@ -219,7 +219,7 @@ footer b{color:#fff}
           </div>
         </div>
         <p class="note" style="margin:0">Vous pouvez zoomer avec <b>+</b> et <b>−</b> (ou avec deux doigts).</p>
-        <div id="rotQ" hidden style="margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px"><p class="q" style="margin:0 0 6px">Alignez le carré orange sur les murs de votre maison</p><input id="rot" type="range" min="-45" max="45" step="1" value="0" style="width:100%;accent-color:#FA890D" aria-label="Angle de la maison"><p class="note" style="margin:6px 0 0">Le fil est calculé à 90°, le long des murs : si la borne et le panneau sont sur le même mur, c’est une ligne droite.</p></div>
+        <div id="rotQ" hidden style="margin-top:8px;padding:0 2px"><p class="note" style="margin:0 0 4px">Seulement si votre maison apparaît de biais sur la photo : tournez le carré orange pour l’aligner sur les murs.</p><input id="rot" type="range" min="-45" max="45" step="1" value="0" style="width:100%;accent-color:#FA890D" aria-label="Angle de la maison (facultatif)"></div>
         </div>
         <div id="manual" hidden>
           <p class="q">Distance approximative entre le panneau et la borne, en suivant les murs</p>
@@ -417,7 +417,7 @@ footer b{color:#fff}
       plan.on('tileerror',function(){if(!fallback){fallback=true;vue(false);}});
       var hint=document.createElement('div');hint.className='tap';hint.id='tapHint';hint.hidden=true;$('#map').parentNode.appendChild(hint);
       map.on('click',function(e){mapMsg('');
-        if(needHouse()){st.houseSet=true;st.free=true;if(home)map.removeLayer(home);home=L.circleMarker(e.latlng,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);map.setView(e.latlng,Math.max(map.getZoom(),20));drawSq();showDist();renderTools();setTimeout(function(){$('#rotQ').scrollIntoView({behavior:'smooth',block:'nearest'});},300);return;}
+        if(needHouse()){st.houseSet=true;st.free=true;if(home)map.removeLayer(home);home=L.circleMarker(e.latlng,{radius:5,color:'#fff',weight:2,fillColor:'#FA890D',fillOpacity:1}).addTo(map);map.setView(e.latlng,Math.max(map.getZoom(),20));drawSq();showDist();renderTools();return;}
         placeMarker(st.mt,e.latlng);});
     } else if(st.addr){ map.setView(c,z); }
     mapMsg('');
