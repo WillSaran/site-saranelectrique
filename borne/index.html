@@ -190,7 +190,7 @@ footer b{color:#fff}
     </div>
     <div class="fld" style="flex:0 1 150px"><label for="f-unite">App. / unité</label><input id="f-unite" autocomplete="address-line2" placeholder="ex. 204"></div>
     </div>
-    <p class="adr-alt">Vous pouvez aussi écrire seulement votre <b>code postal</b>. Adresse introuvable? <button type="button" id="skipMap2">Donnez plutôt une distance approximative entre le panneau et la borne</button>.</p>
+    
 
     <div class="cols" style="margin-top:22px">
       <div class="left">
@@ -234,7 +234,7 @@ footer b{color:#fff}
         </div>
       </div>
     </div>
-    <div class="bar"><button class="btn btn-outline" id="skipS1" type="button">Passer cette étape →</button><button class="btn btn-dark" id="toS1b" type="button">Continuer → Quelques détails</button></div>
+    <div class="bar"><span style="display:flex;flex-wrap:wrap;gap:10px"><button class="btn btn-outline" id="skipS1" type="button">Passer cette étape →</button><button class="btn btn-outline" id="skipMap2" type="button">Donner plutôt une distance approximative</button></span><button class="btn btn-dark" id="toS1b" type="button">Continuer → Quelques détails</button></div>
   </section>
 
   <!-- Étape 2 : détails -->
@@ -443,7 +443,7 @@ footer b{color:#fff}
   var adr=$('#f-adr'),list=$('#adr-list'),tmr=null,lastQ='';
   function fmt(p){return [[p.housenumber,p.street||p.name].filter(Boolean).join(' '),p.city||p.town||p.village,(p.state==='Québec'||p.state==='Quebec')?'QC':p.state,p.postcode].filter(Boolean).join(', ');}
   function choose(t,x,z){adr.value=t;adr.blur();if(map&&!markers.borne){st.houseSet=false;if(home){map.removeLayer(home);home=null;}drawSq();}st.addr={label:t,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0],ville:x.properties.city||x.properties.town||x.properties.village||'',z:z||20};list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=z?'✓ Secteur trouvé : zoomez sur votre maison, puis placez la borne':'✓ Adresse trouvée';$('#adr-ok').hidden=false;initMap();}
-  function goManual(){adr.blur();st.addr=null;st.free=false;st.houseSet=false;if(map){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}if(home){map.removeLayer(home);home=null;}drawSq();}st.dist=st.b.distm?Number(st.b.distm):null;st.skip=true;st.manual=true;showDist();list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent='✓ Adresse notée : indiquez maintenant la distance approximative entre le panneau et la borne.';$('#adr-ok').hidden=false;render();renderTools();setTimeout(function(){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});},120);}
+  function goManual(){adr.blur();st.addr=null;st.free=false;st.houseSet=false;if(map){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}if(home){map.removeLayer(home);home=null;}drawSq();}st.dist=st.b.distm?Number(st.b.distm):null;st.skip=true;st.manual=true;showDist();list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=adr.value.trim()?'✓ Adresse notée : indiquez maintenant la distance approximative entre le panneau et la borne.':'Indiquez la distance approximative entre le panneau et la borne ci-dessous.';$('#adr-ok').hidden=false;render();renderTools();setTimeout(function(){$('#manual').scrollIntoView({behavior:'smooth',block:'center'});},120);}
   function goFree(){adr.blur();st.free=true;st.skip=false;list.hidden=true;adr.setAttribute('aria-expanded','false');$('#adr-ok').textContent=adr.value.trim()?'✓ Adresse notée : trouvez maintenant votre maison sur la carte':'Trouvez votre maison sur la carte';$('#adr-ok').hidden=false;render();initMap();setTimeout(function(){$('#map').scrollIntoView({behavior:'smooth',block:'center'});},80);}
   $('#skipMap2').onclick=goManual;
   var CP=/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
