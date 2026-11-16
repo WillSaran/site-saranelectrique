@@ -89,6 +89,14 @@ main .wrap{padding-block:36px 64px}
 .alt{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .alt span{font-weight:600}
 .alt .btn{padding:10px 16px;font-size:15px}
+.mapsteps{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.mapsteps b.h{display:block;font-size:16px;margin-bottom:8px}
+.mapsteps ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mapsteps li{display:flex;align-items:center;gap:10px;font-size:15px;padding:8px 10px;border-radius:10px;color:#6B6B6B}
+.mapsteps li .n{flex:0 0 28px;height:28px;border-radius:999px;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.mapsteps li.cur{background:#FFF4E6;color:#141414;font-weight:600}.mapsteps li.cur .n{border-color:#FA890D;background:#FA890D;color:#141414}
+.mapsteps li.done{color:#1d7a46}.mapsteps li.done .n{border-color:#1d7a46;background:#1d7a46;color:#fff}
+.mapsteps .rs{margin-top:10px;background:#fff;border:1.5px solid #141414;border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
 .tap{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:440;pointer-events:none;background:rgba(20,20,20,.78);color:#fff;font-weight:700;padding:6px 12px;border-radius:999px;font-size:13px;white-space:nowrap;border:1.5px solid var(--orange);animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(250,137,13,.7)}50%{box-shadow:0 0 0 8px rgba(250,137,13,0)}}
 @media(max-width:560px){.tap{font-size:12px;bottom:22px}}
@@ -186,10 +194,19 @@ footer b{color:#fff}
 
     <div class="cols" style="margin-top:22px">
       <div class="left">
+        <div class="mapsteps" id="mapSteps">
+          <b class="h">Sur la carte, seulement 3 touches :</b>
+          <ol>
+            <li data-k="house"><span class="n">1</span><span>Touchez le <b>centre de votre maison</b></span></li>
+            <li data-k="borne"><span class="n">2</span><span>Touchez l’endroit où sera la <b>borne</b></span></li>
+            <li data-k="panneau"><span class="n">3</span><span>Touchez l’endroit où est votre <b>panneau électrique</b></span></li>
+          </ol>
+          <button type="button" class="rs" id="reset2" hidden>↺ Je me suis trompé : recommencer la carte</button>
+        </div>
         <div class="guide" id="guide" aria-live="polite"></div>
         <div class="pills" id="mapTools">
-          <button type="button" class="tool on" data-mt="borne"><span class="num">1</span><span class="sw sw-b"></span>Où sera la borne</button>
-          <button type="button" class="tool" data-mt="panneau"><span class="num">2</span><span class="sw sw-p"></span>Où est le panneau</button>
+          <button type="button" class="tool on" data-mt="borne"><span class="num">2</span><span class="sw sw-b"></span>Déplacer la borne</button>
+          <button type="button" class="tool" data-mt="panneau"><span class="num">3</span><span class="sw sw-p"></span>Déplacer le panneau</button>
           <button type="button" class="tool" id="skipMap">Passer cette étape →</button>
         </div>
         <div id="mapBlock">
@@ -379,11 +396,14 @@ footer b{color:#fff}
   function renderTools(){
     $$('#mapTools [data-mt]').forEach(function(b){var k=b.getAttribute('data-mt'),on=k===st.mt;b.className='tool'+(on?' on':'')+(markers&&markers[k]?' placed':'');b.setAttribute('aria-pressed',on);});
     var g=$('#guide'),hasB=markers.borne,hasP=markers.panneau;
-    if(needHouse()&&!st.manual){g.className='guide';g.innerHTML='<span class="big">⌂</span><span>'+(st.addr?'Touchez le centre de votre maison':'Entrez votre adresse, ou touchez le centre de votre maison sur la carte')+'<small>Zoomez et déplacez la carte au besoin : on va centrer et agrandir votre maison.</small></span>';}
+    if(needHouse()&&!st.manual){g.className='guide';g.innerHTML='<span class="big">1</span><span>'+(st.addr?'Touchez le centre de votre maison':'Entrez votre adresse plus haut, ou trouvez votre maison et touchez son centre')+'<small>Zoomez et déplacez la carte au besoin : on va centrer et agrandir votre maison.</small></span>';}
     else if(st.manual&&!(hasB&&hasP)){g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Distance choisie à la main<small>'+(st.skip?'Choisissez la distance approximative ci-dessous.':'Vous pouvez quand même placer les points sur la carte pour plus de précision.')+'</small></span>';}
-    else if(st.mt==='borne'&&!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">1</span><span>Touchez la carte à l’endroit où vous voulez la borne<small>Par exemple, le mur du garage ou près de l’entrée de cour.</small></span>';}
-    else if(!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">2</span><span>Touchez maintenant l’endroit où se trouve votre panneau électrique<small>Si vous ne savez pas exactement, placez-le environ dans la pièce où il se trouve.</small></span>';}
-    else{g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Parfait! La distance est calculée.<small>Glissez les points pour ajuster, puis répondez aux questions.</small></span>';}
+    else if(st.mt==='borne'&&!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">2</span><span>Touchez la carte à l’endroit où vous voulez la borne<small>Par exemple, le mur du garage ou près de l’entrée de cour.</small></span>';}
+    else if(!(hasB&&hasP)){g.className='guide';g.innerHTML='<span class="big">3</span><span>Touchez maintenant l’endroit où se trouve votre panneau électrique<small>Si vous ne savez pas exactement, placez-le environ dans la pièce où il se trouve.</small></span>';}
+    else{g.className='guide ok';g.innerHTML='<span class="big">✓</span><span>Parfait! La distance est calculée.<small>Vous pouvez glisser les points pour ajuster. Sinon, cliquez sur « Continuer » plus bas.</small></span>';}
+    var ms=$('#mapSteps');if(ms){ms.hidden=!!st.manual;var cur=needHouse()?'house':(!hasB?'borne':(!hasP?'panneau':''));
+      $$('li[data-k]',ms).forEach(function(li){var k=li.getAttribute('data-k'),dn=k==='house'?st.houseSet||!!hasB:(k==='borne'?!!hasB:!!hasP);li.className=dn?'done':(k===cur?'cur':'');li.querySelector('.n').textContent=dn?'✓':({house:1,borne:2,panneau:3})[k];});
+      $('#reset2').hidden=!(st.houseSet||hasB||hasP);}
     var t=$('#tapHint');if(t)t.hidden=!ready()||(hasB&&hasP);if(t)t.textContent=needHouse()?'👆 Touchez le centre de votre maison':(st.mt==='borne'?'👆 Touchez pour placer la borne':'👆 Touchez pour placer le panneau');
   }
   $$('#mapTools [data-mt]').forEach(function(b){b.onclick=function(){st.mt=b.getAttribute('data-mt');renderTools();};});
@@ -407,6 +427,7 @@ footer b{color:#fff}
   var sat=null,plan=null,fallback=false;
   function vue(p){if(!map)return;if(p){map.removeLayer(sat);plan.addTo(map);}else{map.removeLayer(plan);sat.addTo(map);}}
   $('#rot').addEventListener('input',function(){st.ang=Number(this.value);drawSq();updDist();});
+  $('#reset2').onclick=function(){$('#reset').click();};
   $('#reset').onclick=function(){['borne','panneau'].forEach(function(k){if(markers[k]){map.removeLayer(markers[k]);markers[k]=null;}});if(line){map.removeLayer(line);line=null;}
     if(!st.manual)st.dist=null;st.mt='borne';st.houseSet=false;st.ang=0;$('#rot').value=0;if(home){map.removeLayer(home);home=null;}drawSq();showDist();renderTools();};
   $('#skipMap').onclick=function(){st.skip=!st.skip;st.manual=st.skip?true:st.manual;render();renderTools();
