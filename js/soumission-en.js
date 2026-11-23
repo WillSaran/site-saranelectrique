@@ -199,7 +199,7 @@
     }).then(function(r){return r.json().catch(function(){return {ok:true};});}).then(function(j){
       if(j&&j.ok){stEl.style.color='#2E7D32';stEl.textContent='✓ Request sent to Saran Électrique.';}
       else throw new Error(j&&j.error);
-    }).catch(function(){stEl.style.color='#B3261E';stEl.textContent='Sending failed. Call us at 438-968-3452 and we’ll take your request by phone.';});
+    }).catch(function(){stEl.style.color='#B3261E';stEl.textContent='Sending failed. Call us at 438-490-3412 and we’ll take your request by phone.';});
   };
   function doSend(){$('#nophoto').hidden=true;st.step=4;$('#merci').innerHTML=summary();render();window.scrollTo(0,0);if(window.__sendLead)window.__sendLead();}
   $$('[data-send]').forEach(function(b){b.onclick=function(){if(!st.photos.length){$('#nophoto').hidden=false;$('#np-skip').focus();return;}doSend();};});
