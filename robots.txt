@@ -1,3 +1,4 @@
 User-agent: *
-Allow: /borne/
-Disallow: /
+Allow: /
+
+Sitemap: https://saranelectrique.com/sitemap.xml
