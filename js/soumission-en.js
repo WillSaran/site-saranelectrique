@@ -178,7 +178,7 @@
   };
   function go3(){if(!isBorne()){if(!st.photos.length){$('#nophoto').hidden=false;$('#np-skip').focus();return;}doSend();return;}st.step=3;render();window.scrollTo(0,0);setTimeout(initMap,30);}
 
-  var ENDPOINT='__ENDPOINT__';
+  var ENDPOINT='https://script.google.com/macros/s/AKfycbzIjp7kejZ7VovKEFkqQp5YvAg-_xK1qZng6LaYSKaDNSBFIGLcoDabPHHCmrp1oilg/exec';
   function shrink(f){return new Promise(function(res){
     if(f.type.indexOf('image')!==0){ if(f.size>8e6) return res(null); var r=new FileReader();r.onload=function(){res({name:f.name,type:f.type,data:String(r.result).split(',')[1]});};r.onerror=function(){res(null);};r.readAsDataURL(f);return; }
     var u=URL.createObjectURL(f),im=new Image();im.onload=function(){var k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({name:f.name.replace(/\.[^.]+$/,'')+'.jpg',type:'image/jpeg',data:c.toDataURL('image/jpeg',0.82).split(',')[1]});};im.onerror=function(){res(null);};im.src=u;});}
