@@ -10,6 +10,7 @@
       ['borne','EV charger',I('camion-maison'),'Level 2 charger at home: place it on your house, we estimate the cable.'],
       ['piscine','Pool and hot tub',I('exterieur-nuit'),'Power, grounding and lighting for your backyard.'],
       ['generatrice','Generator transfer panel',I('camion-nuit'),'Transfer panel to connect your generator during outages.'],
+      ['batterie','Battery, solar & EV charging',I('sigen-panne'),'Sigenergy backup battery, solar panels and EV charging connected: keep the power on during outages.'],
       ['chauffage','Heating and thermostats',I('corridor'),'Baseboards, convectors and electronic or smart thermostats.'],
       ['service','Service call / Other',I('camions'),'Repairs, outages, a dead outlet or any other need.']],
     commercial:[['eclairage','Lighting upgrade',I('commerce'),'LED conversion and new fixtures to cut costs and light better.'],
@@ -19,6 +20,7 @@
       ['borne-comm','Commercial EV charging',I('multiplex'),'Business parking, multi-unit buildings and retail.']]};
   var TIPS={borne:['Your electrical panel, door open (we need to see the breakers)','The panel label (brand and amperage)','Where you want the charger','The path between the panel and the charger (basement, garage, exterior wall)'],
     entree:['Your electrical panel, door open','The meter and electrical service outside'],
+    batterie:['A recent Hydro-Québec bill (consumption)','Your electrical panel, door open','The planned battery location (garage, basement, outside wall)','Your generator or solar panels, if you have them'],
     service:['What isn’t working (outlet, light, breaker)','Your electrical panel, door open'],
     _:['The rooms or area involved','Your electrical panel, door open','Your plans, if you have any']};
   var delais=[['urgent','Urgent'],['mois','Within 1 month'],['trois','1 to 3 months'],['info','Just exploring']];

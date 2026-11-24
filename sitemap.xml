@@ -39,4 +39,5 @@
   <url><loc>https://saranelectrique.com/en/products/</loc><xhtml:link rel="alternate" hreflang="fr-CA" href="https://saranelectrique.com/produits/"/><xhtml:link rel="alternate" hreflang="en-CA" href="https://saranelectrique.com/en/products/"/></url>
   <url><loc>https://saranelectrique.com/en/quote/</loc><xhtml:link rel="alternate" hreflang="fr-CA" href="https://saranelectrique.com/soumission/"/><xhtml:link rel="alternate" hreflang="en-CA" href="https://saranelectrique.com/en/quote/"/></url>
   <url><loc>https://saranelectrique.com/services/batterie-solaire/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://saranelectrique.com/en/services/battery-backup-solar/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

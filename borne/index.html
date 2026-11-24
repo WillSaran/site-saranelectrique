@@ -155,6 +155,7 @@ footer b{color:#fff}
 .avis-note{display:flex;align-items:center;gap:12px}.avis-note b{font-family:Rajdhani,sans-serif;font-size:44px;line-height:1}
 #stars button{background:none;border:0;padding:0 2px;font-size:34px;line-height:1;color:#D0D0D0;cursor:pointer;touch-action:manipulation}#stars button.on{color:#FA890D}
 </style>
+<script>/* Langue auto selon le navigateur (garde le choix manuel FR/EN) */(function(){try{var ua=navigator.userAgent||'';if(/bot|crawl|spider|slurp|lighthouse|headless|preview/i.test(ua))return;var K='se-lang',p=null;try{p=localStorage.getItem(K)}catch(e){}document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[hreflang]');if(a){try{localStorage.setItem(K,a.getAttribute('hreflang').slice(0,2))}catch(_){}}},true);var cur=(document.documentElement.lang||'fr').slice(0,2).toLowerCase();var w=p||((navigator.languages&&navigator.languages[0])||navigator.language||'fr').slice(0,2).toLowerCase();if(w!=='en')w='fr';if(w===cur)return;var l=document.querySelector('link[rel="alternate"][hreflang^="'+w+'"]');if(!l)return;var u=new URL(l.href,location.href);if(u.pathname!==location.pathname)location.replace(u.pathname+location.search+location.hash);}catch(e){}})();</script>
 </head>
 <body>
 
