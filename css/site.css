@@ -183,3 +183,9 @@ img{max-width:100%}
   .menu-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1.5px solid #e3e3e3;border-radius:10px;background:#fff;font-size:20px;cursor:pointer;flex:none}
   .nav-links .nav-a,.nav-links .nav-top{padding:12px 0;border-bottom:1px solid #f0f0f0;display:block}
 }
+/* Chroniques Facebook */
+.chr em{font-style:normal;color:#4d4d4d;font-size:15px;line-height:1.5;padding:0 14px}
+.chr b{color:#995000;font-size:14px;padding:10px 14px 16px;margin-top:auto}
+.chr:hover b{color:#FA890D}
+.chr-all{background:#141414;color:#fff;border-color:#141414;justify-content:center;min-height:200px}
+.chr-all span{color:#fff;font-size:24px}.chr-all em{color:#cfcfcf}.chr-all b{color:#FA890D}
