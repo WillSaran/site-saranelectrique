@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://saranelectrique.com/sitemap.xml
+Disallow: /fiche/
