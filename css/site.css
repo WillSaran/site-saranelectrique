@@ -163,3 +163,23 @@ img{max-width:100%}
 .why p{margin:0;line-height:1.55;font-size:15px;color:#4d4d4d}.why .dark p{color:#cfcfcf}
 @media (max-width:700px){.head-r{width:100%;justify-content:space-between}}
 @media print{.rv{opacity:1!important;transform:none!important}}
+/* Borne : pastilles sur une ligne + gros bouton */
+.pills-row{display:flex;flex-wrap:nowrap;gap:6px;max-width:100%}
+.pills-row span{background:#fff;border:1px solid #E3E3E3;padding:6px 10px;border-radius:999px;font-size:clamp(11px,3.2vw,14px);white-space:nowrap}
+.btn-borne{display:inline-flex;align-items:center;justify-content:center;align-self:stretch;max-width:460px;background:#FA890D;color:#141414;text-decoration:none;font-weight:800;font-size:clamp(17px,4.6vw,20px);white-space:nowrap;padding:18px 26px;border-radius:14px;box-shadow:0 10px 24px rgba(250,137,13,.35);transition:transform .2s,box-shadow .2s,background .2s}
+.btn-borne:hover{transform:translateY(-2px);background:#ff9a26;box-shadow:0 14px 30px rgba(250,137,13,.45)}
+/* Cellulaire : en-tête compact, ne suit pas le défilement, menu repliable */
+.menu-btn{display:none}
+@media (max-width:760px){
+  .site-head{position:static;backdrop-filter:none}
+  .site-head>div{padding:10px 16px!important;gap:10px!important;flex-wrap:nowrap!important}
+  .site-head img[data-img="logo"]{width:46px!important;height:46px!important}
+  .site-head .nav-links{display:none!important;position:absolute;left:0;right:0;top:100%;background:#fff;flex-direction:column;padding:8px 16px 16px;box-shadow:0 12px 24px rgba(0,0,0,.08);z-index:70}
+  .site-head.open .nav-links{display:flex!important}
+  .site-head{position:relative}
+  .head-r{width:auto;gap:8px;margin-left:auto}
+  .btn-cta{padding:9px 12px;font-size:13px;white-space:nowrap}
+  .lang{font-size:12px}.lang span,.lang a{padding:5px 8px}
+  .menu-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1.5px solid #e3e3e3;border-radius:10px;background:#fff;font-size:20px;cursor:pointer;flex:none}
+  .nav-links .nav-a,.nav-links .nav-top{padding:12px 0;border-bottom:1px solid #f0f0f0;display:block}
+}

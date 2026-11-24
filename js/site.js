@@ -2,6 +2,11 @@
   document.querySelectorAll('a[href="#"]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();});});
   document.querySelectorAll('.nav-top').forEach(function(b){b.addEventListener('click',function(e){if(window.matchMedia('(hover:none)').matches){var d=b.parentNode;if(!d.classList.contains('open')){e.preventDefault();d.classList.add('open');}}});});
   var nl=document.getElementById('nl');if(nl){var btn=nl.parentNode.querySelector('button');btn&&btn.addEventListener('click',function(){if(!nl.value||!nl.checkValidity()){nl.focus();nl.reportValidity();return;}btn.textContent=document.documentElement.lang.indexOf('en')===0?'Thanks! See you next week.':'Merci ! À la semaine prochaine.';btn.disabled=true;});}
+  // Menu repliable (cellulaire)
+  var head=document.querySelector('.site-head');var dd=head&&head.querySelector('.nav-dd');
+  if(head&&dd){var nav=dd.parentNode;nav.classList.add('nav-links');var mb=document.createElement('button');mb.type='button';mb.className='menu-btn';mb.setAttribute('aria-label',document.documentElement.lang.indexOf('en')===0?'Menu':'Menu');mb.setAttribute('aria-expanded','false');mb.innerHTML='&#9776;';
+    var hr=head.querySelector('.head-r');(hr||nav).parentNode.appendChild(mb);
+    mb.addEventListener('click',function(){var o=head.classList.toggle('open');mb.setAttribute('aria-expanded',o);mb.innerHTML=o?'&#10005;':'&#9776;';});}
   // Apparition au défilement
   var els=[].slice.call(document.querySelectorAll('.wrap > h2, .cardgrid, .avis-grid, .why, .sg-steps, .sg-split, .prose, [data-rv]'));
   var pend=els.filter(function(el){return el.getBoundingClientRect().top>window.innerHeight;});
