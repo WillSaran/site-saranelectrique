@@ -112,3 +112,54 @@ img{max-width:100%}
 .stars{color:#FA890D;letter-spacing:2px;font-size:18px}
 .avis-top{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:22px}
 .avis-note{display:flex;align-items:center;gap:12px}.avis-note b{font-family:Rajdhani,sans-serif;font-size:44px;line-height:1}
+
+/* ===== v3 : en-tête blanc, langue FR/EN, mouvement ===== */
+.site-head{background:rgba(255,255,255,.96);color:#141414;position:sticky;top:0;z-index:60;box-shadow:0 1px 0 #ececec,0 6px 18px rgba(0,0,0,.05);backdrop-filter:saturate(1.4) blur(8px)}
+.site-head .nav-top,.site-head .nav-a{color:#141414;text-decoration:none;padding:10px 0;position:relative;font-weight:500}
+.site-head .nav-a::after,.site-head .nav-top::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:2px;background:#FA890D;transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
+.site-head .nav-a:hover::after,.site-head .nav-top:hover::after{transform:scaleX(1)}
+.site-head .nav-a:hover,.site-head .nav-top:hover{color:#141414}
+.head-r{display:flex;align-items:center;gap:14px}
+.lang{display:flex;border:1.5px solid #e3e3e3;border-radius:999px;padding:3px;font-size:13px;font-weight:700}
+.lang span,.lang a{padding:5px 11px;border-radius:999px;color:#6b6b6b;text-decoration:none;line-height:1}
+.lang .on{background:#141414;color:#fff}
+.lang a:hover{color:#141414;background:#f3f3f3}
+.btn-cta{background:#FA890D;color:#141414;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:10px;font-size:15px;transition:transform .2s ease,box-shadow .2s ease,background .2s}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(250,137,13,.35);background:#ff9a26}
+.btn-orange,.btn-dark,.btn-outline{transition:transform .2s ease,box-shadow .2s ease,background .2s,color .2s}
+.btn-orange:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(250,137,13,.35)}
+.btn-dark:hover{transform:translateY(-2px);background:#FA890D;color:#141414}
+.btn-outline:hover{border-color:#FA890D;color:#FA890D}
+/* cartes */
+.mini{transition:transform .25s ease,box-shadow .25s ease,border-color .25s}
+.mini img{transition:transform .5s ease}
+.mini:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.10);border-color:#FA890D}
+.mini:hover img{transform:scale(1.05)}
+.mini span{transition:color .2s}.mini:hover span{color:#FA890D}
+.mini{overflow:hidden}
+/* apparition au défilement */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.mini,.mini img,.btn-cta{transition:none}}
+/* bandeau défilant */
+.marquee{background:#141414;color:#fff;overflow:hidden;white-space:nowrap;border-top:3px solid #FA890D}
+.marquee-track{display:inline-flex;gap:0;animation:mq 38s linear infinite;padding:16px 0}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee span{font-family:Rajdhani,sans-serif;font-weight:700;font-size:20px;letter-spacing:.04em;text-transform:uppercase;padding:0 26px}
+.marquee span::after{content:"✦";color:#FA890D;margin-left:52px}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* diaporama d'accueil */
+.hero-slides{position:relative;overflow:hidden}
+.hero-slides img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s ease, transform 6s ease;transform:scale(1.04)}
+.hero-slides img.on{opacity:1;transform:scale(1)}
+/* pourquoi nous choisir */
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.why div{background:#fff;border:1px solid #E3E3E3;border-radius:16px;padding:24px;transition:transform .25s,box-shadow .25s,border-color .25s,background .25s}
+.why div:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.08);border-color:#FA890D}
+.why div.dark{background:#141414;color:#fff;border-color:#141414}
+.why .ic{display:inline-flex;width:44px;height:44px;border-radius:12px;background:#FFF1E2;align-items:center;justify-content:center;margin-bottom:12px}
+.why .dark .ic{background:#2a2a2a}
+.why h3{margin:0 0 6px;font-family:Rajdhani,sans-serif;font-size:22px}
+.why p{margin:0;line-height:1.55;font-size:15px;color:#4d4d4d}.why .dark p{color:#cfcfcf}
+@media (max-width:700px){.head-r{width:100%;justify-content:space-between}}
+@media print{.rv{opacity:1!important;transform:none!important}}
