@@ -128,7 +128,7 @@
     $('#steps').innerHTML=['1 · Projet','2 · Vos infos','3 · Soumission'].map(function(l,k){var c=st.step===k+1?'on':(st.step>k+1?'done':'');return '<span class="step '+c+'">'+l+'</span>';}).join('');
     // Étape 1
     var cd=$('#cards');cd.innerHTML='';$('#backSect').hidden=!st.bat;
-    if(!st.bat){$('#s1title').textContent='Quel type de projet ?';$('#s1sub').textContent='Choisissez votre secteur.';
+    if(!st.bat){$('#s1title').textContent='Quel type de projet?';$('#s1sub').textContent='Choisissez votre secteur.';
       SECT.forEach(function(it){cd.appendChild(card(it,'big',function(){st.bat=it[0];st.projet=null;render();window.scrollTo(0,0);}));});}
     else{$('#s1title').textContent=st.bat==='commercial'?'Votre projet commercial':'Votre projet résidentiel';$('#s1sub').textContent='Touchez une carte pour voir le détail, puis choisissez.';
       PROJ[st.bat].forEach(function(it){cd.appendChild(card(it,'',function(){if(it[0]==='borne'){location.href='/borne/';return;}st.projet=it[0];st.step=2;render();window.scrollTo(0,0);}));});}
@@ -142,7 +142,7 @@
     $$('.r-bat').forEach(function(e){e.textContent=sectLabel();});
     $$('.r-projet').forEach(function(e){e.textContent=projLabel();});
     $$('.r-photos').forEach(function(e){e.textContent=st.photos.length?st.photos.length+' photo(s) ajoutée(s) ✓':'Aucune photo pour l’instant';});
-    $('#toS3').textContent=isBorne()?'Continuer → Placer ma borne':'Continuer → Préparer la soumission';
+    $('#toS3').textContent=isBorne()?'Continuer → Placer ma borne':'Envoyer ma demande';
     // Étape 3 plan
     var tl=$('#tools');tl.innerHTML='';tools.forEach(function(t){var b=document.createElement('button');b.type='button';b.className='tool'+(st.tool===t[0]?' on':'');b.setAttribute('aria-pressed',st.tool===t[0]);b.innerHTML='<span class="chip">'+SYM[t[0]]+'</span><span>'+t[1]+'</span>';b.onclick=function(){st.tool=t[0];render();};tl.appendChild(b);});
     var cl=$('#cells');cl.innerHTML='';for(var i=0;i<96;i++){(function(i){var v=st.cells[i];var b=document.createElement('button');b.type='button';b.className='cell';b.setAttribute('aria-label','Case '+(i+1)+(v?' : '+NAMES[v]:' : vide'));b.innerHTML=v?SYM[v]:'';b.onclick=function(){if(st.tool==='X'||st.cells[i]===st.tool)delete st.cells[i];else st.cells[i]=st.tool;render();};cl.appendChild(b);})(i);}
@@ -163,7 +163,7 @@
         '<li>Panneau : '+esc(lbl(Q.amp,st.b.amp))+'</li>'+
         '<li>Passage du câble : '+esc(lbl(Q.passage,st.b.passage))+'</li>'+
         '<li>Borne : '+esc(st.b.achat==='oui'?([$('#f-marque').value,$('#f-modele').value].filter(Boolean).join(' ')||'déjà achetée'):lbl(Q.achat,st.b.achat))+'</li></ul>';
-    } else { var n=counts(); h+='<p style="margin:0 0 8px">Plan : '+n.P+' prises · '+n.L+' lumières · '+n.S+' interrupteurs · '+n.B+' borne(s)</p>'; }
+    }
     h+='<p style="margin:0">'+st.photos.length+' photo(s) jointe(s). On vous revient rapidement, du lundi au vendredi entre 7 h et 16 h.</p>';
     return h;
   }
@@ -176,7 +176,7 @@
       fetch('https://photon.komoot.io/api/?limit=1&lang=fr&lat=45.31&lon=-73.26&q='+encodeURIComponent($('#f-adr').value)).then(function(r){return r.json();}).then(function(j){var x=(j.features||[])[0];if(x)st.addr={label:$('#f-adr').value,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0]};go3();}).catch(go3);
     } else go3();
   };
-  function go3(){st.step=3;render();window.scrollTo(0,0);if(isBorne())setTimeout(initMap,30);}
+  function go3(){if(!isBorne()){if(!st.photos.length){$('#nophoto').hidden=false;$('#np-skip').focus();return;}doSend();return;}st.step=3;render();window.scrollTo(0,0);setTimeout(initMap,30);}
 
   var ENDPOINT='__ENDPOINT__';
   function shrink(f){return new Promise(function(res){
@@ -193,7 +193,7 @@
       if(Pp)liens.push({label:'Voir le panneau sur Google Maps',url:'https://www.google.com/maps/search/?api=1&query='+Pp.lat.toFixed(6)+','+Pp.lng.toFixed(6)});
       d.borne={distance:st.dist?('≈ '+st.dist+' pi (trajet à 90°)'):'non indiquée',lieu:lbl(Q.lieu,st.b.lieu),amp:lbl(Q.amp,st.b.amp),passage:lbl(Q.passage,st.b.passage),
         borne:st.b.achat==='oui'?([$('#f-marque').value,$('#f-modele').value].filter(Boolean).join(' ')||'déjà achetée'):lbl(Q.achat,st.b.achat),liens:liens};}
-    else{var n=counts();d.plan=n.P+' prises · '+n.L+' lumières · '+n.S+' interrupteurs · '+n.B+' borne(s)';}
+    
     Promise.all(st.photos.map(shrink)).then(function(ph){
       var ok=[],tot=0,om=0;ph.forEach(function(p){if(p&&tot+p.data.length<18e6){ok.push(p);tot+=p.data.length;}else om++;});
       d.photos=ok;if(om)d.omis=om+' fichier(s) trop lourd(s) non joint(s)';

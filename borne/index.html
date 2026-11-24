@@ -7,7 +7,7 @@
 <meta name="description" content="Recevez par courriel une estimation pour l'installation de votre borne de recharge à la maison. Entrepreneur électricien à Saint-Jean-sur-Richelieu et en Montérégie. Aide Écorecharge jusqu'à 600 $.">
 <link rel="canonical" href="https://saranelectrique.com/borne/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Combien coûte l'installation de votre borne ? – Saran Électrique">
+<meta property="og:title" content="Combien coûte l'installation de votre borne? – Saran Électrique">
 <meta property="og:description" content="Placez votre borne sur la vue satellite de votre maison et recevez votre estimation par courriel.">
 <meta property="og:image" content="https://saranelectrique.com/borne/borne-saran.jpg">
 <meta property="og:url" content="https://saranelectrique.com/borne/">
@@ -246,10 +246,10 @@ footer b{color:#fff}
     <div class="card" style="max-width:820px;display:flex;flex-direction:column;gap:20px">
       <div><p class="q" style="margin-bottom:8px">Type de bâtiment <span style="font-weight:400;color:var(--mute)">(facultatif)</span></p><div class="pills" data-q="bat"></div>
       <p class="note" id="bat-note" hidden style="margin:10px 0 0;max-width:720px;background:#FFF4E6;border:1px solid #FA890D;border-radius:10px;padding:10px 12px;color:#4D4D4D">En condo, en appartement ou en plex, l’installation est souvent plus complexe : panneau et stationnement parfois éloignés, accord du syndicat ou du propriétaire, et possiblement un <b>contrôleur de charge</b> si la capacité électrique est limitée. On vous donne une estimation de départ, puis on évalue les travaux avec vous.</p></div>
-        <div><p class="q">Où sera la borne ?</p><div class="pills" data-q="lieu"></div></div>
+        <div><p class="q">Où sera la borne?</p><div class="pills" data-q="lieu"></div></div>
         <div><p class="q">Ampérage de votre panneau</p><div class="pills" data-q="amp"></div></div>
         <div><p class="q">Le câble passera…</p><div class="pills" data-q="passage"></div></div>
-        <div><p class="q">Avez-vous déjà votre borne ?</p><div class="pills" data-q="achat"></div>
+        <div><p class="q">Avez-vous déjà votre borne?</p><div class="pills" data-q="achat"></div>
           <div id="modele-wrap" hidden style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
             <div class="fld"><label for="f-marque">Marque</label><select id="f-marque"><option value="">Choisir…</option><option>FLO</option><option>Grizzl-E</option><option>Tesla Wall Connector</option><option>ChargePoint</option><option>Autel</option><option>Wallbox</option><option>Autre</option></select></div>
             <div class="fld"><label for="f-modele">Modèle</label><input id="f-modele" placeholder="ex. FLO Home X5, Grizzl-E Classic…"></div>
@@ -263,7 +263,7 @@ footer b{color:#fff}
 
   <!-- Étape 2 : courriel -->
   <section id="s2" hidden>
-    <h2 class="t" id="s2t">Où envoyer votre estimation ?</h2>
+    <h2 class="t" id="s2t">Où envoyer votre estimation?</h2>
     <p class="sub" id="s2s">On vous l'envoie par courriel en quelques secondes.</p>
     <form id="form" class="card" novalidate style="max-width:720px">
       <div class="grid2">
@@ -311,15 +311,15 @@ footer b{color:#fff}
         <p class="note" style="margin:6px 0 0">Répondez simplement à notre courriel avec des photos de votre panneau électrique (porte ouverte) et de l'emplacement souhaité.</p>
       </div>
       <div class="card" id="rate" style="text-align:left;width:100%">
-        <b>Comment avez-vous trouvé cette demande d’estimation ?</b>
+        <b>Comment avez-vous trouvé cette demande d’estimation?</b>
         <div id="stars" role="radiogroup" aria-label="Note de 1 à 5 étoiles" style="display:flex;gap:6px;margin:8px 0 4px">
           <button type="button" data-n="1" aria-label="1 étoile">★</button><button type="button" data-n="2" aria-label="2 étoiles">★</button><button type="button" data-n="3" aria-label="3 étoiles">★</button><button type="button" data-n="4" aria-label="4 étoiles">★</button><button type="button" data-n="5" aria-label="5 étoiles">★</button>
         </div>
         <div id="rate-more" hidden>
-          <textarea id="rate-txt" rows="2" maxlength="500" placeholder="Un commentaire ? (facultatif)" style="width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:15px"></textarea>
+          <textarea id="rate-txt" rows="2" maxlength="500" placeholder="Un commentaire? (facultatif)" style="width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:15px"></textarea>
           <button type="button" class="btn btn-dark" id="rate-send" style="margin-top:8px">Envoyer ma note</button>
         </div>
-        <p id="rate-ok" hidden style="margin:6px 0 0;color:#1E7B34;font-weight:600">Merci pour votre note !</p>
+        <p id="rate-ok" hidden style="margin:6px 0 0;color:#1E7B34;font-weight:600">Merci pour votre note!</p>
         <p class="note" style="margin:6px 0 0">Votre avis nous aide à améliorer notre service à la clientèle.</p>
       </div>
     </div>
@@ -367,7 +367,7 @@ footer b{color:#fff}
     $$('#mapTools [data-mt]').forEach(function(b){b.hidden=!!st.skip;});
     $('#skipMap').textContent=st.skip?'← Revenir à la carte':'Passer cette étape →';
     var com=st.b.bat==='commerce';
-    $('#s2t').textContent=com?'Où vous écrire ?':'Où envoyer votre estimation ?';
+    $('#s2t').textContent=com?'Où vous écrire?':'Où envoyer votre estimation?';
     $('#s2s').textContent=com?'Pour un commerce, on évalue sur place : on vous écrit pour planifier une visite.':'On vous l’envoie par courriel en quelques secondes.';
     if(!$('#send').disabled)$('#send').textContent=com?'Envoyer ma demande':'Recevoir mon estimation par courriel';
     $('#toS2').textContent=com?'Continuer →':'Continuer → Recevoir mon estimation';

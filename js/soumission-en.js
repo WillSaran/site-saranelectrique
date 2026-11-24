@@ -142,7 +142,7 @@
     $$('.r-bat').forEach(function(e){e.textContent=sectLabel();});
     $$('.r-projet').forEach(function(e){e.textContent=projLabel();});
     $$('.r-photos').forEach(function(e){e.textContent=st.photos.length?st.photos.length+' photo(s) added ✓':'No photos yet';});
-    $('#toS3').textContent=isBorne()?'Continue → Place my charger':'Continue → Prepare my quote';
+    $('#toS3').textContent=isBorne()?'Continue → Place my charger':'Send my request';
     // Étape 3 plan
     var tl=$('#tools');tl.innerHTML='';tools.forEach(function(t){var b=document.createElement('button');b.type='button';b.className='tool'+(st.tool===t[0]?' on':'');b.setAttribute('aria-pressed',st.tool===t[0]);b.innerHTML='<span class="chip">'+SYM[t[0]]+'</span><span>'+t[1]+'</span>';b.onclick=function(){st.tool=t[0];render();};tl.appendChild(b);});
     var cl=$('#cells');cl.innerHTML='';for(var i=0;i<96;i++){(function(i){var v=st.cells[i];var b=document.createElement('button');b.type='button';b.className='cell';b.setAttribute('aria-label','Cell '+(i+1)+(v?' : '+NAMES[v]:': empty'));b.innerHTML=v?SYM[v]:'';b.onclick=function(){if(st.tool==='X'||st.cells[i]===st.tool)delete st.cells[i];else st.cells[i]=st.tool;render();};cl.appendChild(b);})(i);}
@@ -163,7 +163,7 @@
         '<li>Panel: '+esc(lbl(Q.amp,st.b.amp))+'</li>'+
         '<li>Cable route: '+esc(lbl(Q.passage,st.b.passage))+'</li>'+
         '<li>Charger: '+esc(st.b.achat==='oui'?([$('#f-marque').value,$('#f-modele').value].filter(Boolean).join(' ')||'already purchased'):lbl(Q.achat,st.b.achat))+'</li></ul>';
-    } else { var n=counts(); h+='<p style="margin:0 0 8px">Plan: '+n.P+' outlets · '+n.L+' lights · '+n.S+' switches · '+n.B+' borne(s)</p>'; }
+    }
     h+='<p style="margin:0">'+st.photos.length+' photo(s) attached. We’ll get back to you quickly, Monday to Friday between 7 a.m. and 4 p.m.</p>';
     return h;
   }
@@ -176,7 +176,7 @@
       fetch('https://photon.komoot.io/api/?limit=1&lang=fr&lat=45.31&lon=-73.26&q='+encodeURIComponent($('#f-adr').value)).then(function(r){return r.json();}).then(function(j){var x=(j.features||[])[0];if(x)st.addr={label:$('#f-adr').value,lat:x.geometry.coordinates[1],lon:x.geometry.coordinates[0]};go3();}).catch(go3);
     } else go3();
   };
-  function go3(){st.step=3;render();window.scrollTo(0,0);if(isBorne())setTimeout(initMap,30);}
+  function go3(){if(!isBorne()){if(!st.photos.length){$('#nophoto').hidden=false;$('#np-skip').focus();return;}doSend();return;}st.step=3;render();window.scrollTo(0,0);setTimeout(initMap,30);}
 
   var ENDPOINT='__ENDPOINT__';
   function shrink(f){return new Promise(function(res){
@@ -187,13 +187,13 @@
     if(ENDPOINT.indexOf('http')!==0){stEl.textContent='(Demo: email sending is not connected yet.)';return;}
     stEl.style.color='#6B6B6B';stEl.textContent='Sending your request…';
     var d={nom:$('#f-nom').value,tel:$('#f-tel').value,mail:$('#f-mail').value,adresse:st.addr?st.addr.label:$('#f-adr').value,
-      secteur:sectLabel(),projet:projLabel(),delai:lbl(delais,st.delai),notes:$('#f-notes').value,hp:$('#f-hp').value,version:(document.querySelector('.ver')||{}).textContent};
+      secteur:sectLabel(),projet:projLabel(),delai:lbl(delais,st.delai),notes:$('#f-notes').value,hp:$('#f-hp').value,version:(document.querySelector('.ver')||{}).textContent,lang:'en'};
     if(isBorne()){var mk=function(m){return m?m.getLatLng():null;},Bp=mk(markers.borne),Pp=mk(markers.panneau),liens=[];
       if(Bp)liens.push({label:'See the charger on Google Maps',url:'https://www.google.com/maps/search/?api=1&query='+Bp.lat.toFixed(6)+','+Bp.lng.toFixed(6)});
       if(Pp)liens.push({label:'See the panel on Google Maps',url:'https://www.google.com/maps/search/?api=1&query='+Pp.lat.toFixed(6)+','+Pp.lng.toFixed(6)});
       d.borne={distance:st.dist?('≈ '+st.dist+' ft (90° route)'):'not specified',lieu:lbl(Q.lieu,st.b.lieu),amp:lbl(Q.amp,st.b.amp),passage:lbl(Q.passage,st.b.passage),
         borne:st.b.achat==='oui'?([$('#f-marque').value,$('#f-modele').value].filter(Boolean).join(' ')||'already purchased'):lbl(Q.achat,st.b.achat),liens:liens};}
-    else{var n=counts();d.plan=n.P+' outlets · '+n.L+' lights · '+n.S+' switches · '+n.B+' charger(s)';}
+    
     Promise.all(st.photos.map(shrink)).then(function(ph){
       var ok=[],tot=0,om=0;ph.forEach(function(p){if(p&&tot+p.data.length<18e6){ok.push(p);tot+=p.data.length;}else om++;});
       d.photos=ok;if(om)d.omis=om+' file(s) too large, not attached';
