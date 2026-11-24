@@ -10,6 +10,7 @@
       ['borne','Borne de recharge',I('camion-maison'),'Borne niveau 2 à la maison : placez-la sur votre maison, on estime le câble.'],
       ['piscine','Piscine et spa',I('exterieur-nuit'),'Alimentation, mise à la terre et éclairage pour votre cour.'],
       ['generatrice','Panneau pour génératrice',I('camion-nuit'),'Panneau de transfert pour brancher votre génératrice pendant les pannes.'],
+      ['batterie','Batterie, solaire et borne',I('sigen-panne'),'Batterie de secours Sigenergy, panneaux solaires et borne reliés : gardez le courant pendant les pannes.'],
       ['chauffage','Chauffage et thermostats',I('corridor'),'Plinthes, convecteurs et thermostats électroniques ou intelligents.'],
       ['service','Appel de service / Autre',I('camions'),'Dépannage, panne, prise qui ne fonctionne plus ou tout autre besoin.']],
     commercial:[['eclairage','Mise à niveau de l’éclairage',I('commerce'),'Conversion DEL et nouveaux luminaires pour réduire vos coûts et mieux éclairer.'],
@@ -19,6 +20,7 @@
       ['borne-comm','Bornes de recharge commerciales',I('multiplex'),'Stationnements d’entreprise, multilogements et commerces.']]};
   var TIPS={borne:['Votre panneau électrique, porte ouverte (on doit voir les disjoncteurs)','L’étiquette du panneau (marque et ampérage)','L’endroit où vous voulez la borne','Le chemin entre le panneau et la borne (sous-sol, garage, mur extérieur)'],
     entree:['Votre panneau électrique, porte ouverte','Le compteur et l’entrée électrique à l’extérieur'],
+    batterie:['Votre facture d’Hydro-Québec récente (consommation)','Votre panneau électrique, porte ouverte','L’endroit prévu pour la batterie (garage, sous-sol, mur extérieur)','Votre génératrice ou vos panneaux solaires, si vous en avez'],
     service:['Ce qui ne fonctionne pas (prise, lumière, disjoncteur)','Votre panneau électrique, porte ouverte'],
     _:['Les pièces ou l’espace visés par les travaux','Votre panneau électrique, porte ouverte','Vos plans, si vous en avez']};
   var delais=[['urgent','Urgent'],['mois','D’ici 1 mois'],['trois','1 à 3 mois'],['info','Je m’informe']];
