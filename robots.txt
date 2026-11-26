@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /fiche/
 
 Sitemap: https://saranelectrique.com/sitemap.xml
-Disallow: /fiche/

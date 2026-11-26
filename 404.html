@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page introuvable | Saran Électrique</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/site.css?v3.8">
+<script>
+/* Anciennes adresses (ancien site) : on renvoie vers la bonne page */
+(function(){
+  var p=location.pathname.toLowerCase().replace(/\/+$/,'');
+  var map={
+    '/fr':'/','/fr/accueil':'/','/home':'/','/accueil':'/',
+    '/fr/service':'/services/','/fr/services':'/services/','/service':'/services/',
+    '/fr/contact':'/contact/','/fr/nous-joindre':'/contact/','/nous-joindre':'/contact/',
+    '/fr/a-propos':'/a-propos/','/about':'/en/about/',
+    '/fr/soumission':'/soumission/','/devis':'/soumission/','/fr/devis':'/soumission/',
+    '/fr/realisations':'/realisations/','/fr/galerie':'/realisations/','/galerie':'/realisations/',
+    '/fr/borne':'/services/borne-de-recharge/','/sitemap_index.xml':'/sitemap.xml'
+  };
+  var t=map[p];
+  if(!t && p.indexOf('/fr/')===0) t='/';
+  if(t) location.replace(t);
+})();
+</script>
+</head>
+<body style="margin:0;background:#F4F4F4;font-family:Inter,system-ui,sans-serif;color:#141414">
+<div style="max-width:640px;margin:0 auto;padding:80px 24px;text-align:center">
+  <a href="/"><img src="/img/logo.jpg" alt="Saran Électrique" style="width:84px;height:84px;border-radius:999px"></a>
+  <h1 style="font-family:Rajdhani,sans-serif;font-size:40px;margin:24px 0 8px">Page introuvable</h1>
+  <p style="font-size:17px;line-height:1.6;margin:0 0 6px">Cette page n’existe plus ou a changé d’adresse.</p>
+  <p lang="en" style="font-size:15px;color:#555;margin:0 0 28px">This page no longer exists or has moved.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+    <a href="/" class="btn-cta">Accueil</a>
+    <a href="/services/" class="btn-cta" style="background:#141414">Nos services</a>
+    <a href="/contact/" class="btn-cta" style="background:#141414">Nous joindre</a>
+    <a href="/en/" class="btn-cta" style="background:#141414">English</a>
+  </div>
+  <p style="margin-top:32px;font-size:15px"><a href="tel:4384903412" style="color:#141414;font-weight:700">438-490-3412</a></p>
+</div>
+</body>
+</html>
